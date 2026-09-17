@@ -1,0 +1,6 @@
+# Files NOT injected into every session's context (session-rules.ps1 reads this).
+# One memory basename per line (no .md), '#' comments allowed. Absent file -> inject all.
+# Put PROJECT-STATE memories here (inventory, not method): they are read on demand when
+# entering the project (/enter), not carried in every session. Method rules stay injected.
+# Measured at the source machine 2026-09-16: 45 method files ~ 100 KB / ~25k tokens per injection;
+# excluding project state is what keeps it there. Tune the cost here, never by summarising.

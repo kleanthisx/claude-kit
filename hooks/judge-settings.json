@@ -1,0 +1,14 @@
+{
+  "disableAllHooks": true,
+  "model": "claude-sonnet-5",
+  "permissions": {
+    "allow": ["Read", "Grep", "Glob"],
+    "deny": [
+      "Write", "Edit", "NotebookEdit",
+      "Bash", "PowerShell",
+      "Agent", "Task",
+      "WebFetch", "WebSearch",
+      "Artifact", "SendMessage", "SendUserFile"
+    ]
+  }
+}

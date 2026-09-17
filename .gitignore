@@ -1,0 +1,6 @@
+*.log
+judge-state.json
+settings.json.*.bak
+memory/personal/
+.script-approvals.json
+memory/core-sensitive/

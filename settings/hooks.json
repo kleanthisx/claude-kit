@@ -1,0 +1,121 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/guard-destructive.ps1",
+            "timeout": 30,
+            "statusMessage": "Checking command safety"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/guard-plan-gate.ps1",
+            "timeout": 30,
+            "statusMessage": "Plan gate"
+          }
+        ]
+      },
+      {
+        "matcher": "Workflow",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/guard-launch-gate.ps1",
+            "timeout": 30,
+            "statusMessage": "Launch gate"
+          }
+        ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/guard-agent-fleet.ps1",
+            "timeout": 30,
+            "statusMessage": "Fleet gate"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/run-posttest.ps1",
+            "timeout": 300,
+            "statusMessage": "Running project tests",
+            "asyncRewake": true
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/guard-destructive.ps1"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/judge-dread.ps1",
+            "timeout": 120,
+            "statusMessage": "Auditing completion claim"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1",
+            "timeout": 15,
+            "statusMessage": "Loading rules summary"
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1",
+            "timeout": 15,
+            "statusMessage": "Reloading rules summary"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/judge-dread-deliver.ps1",
+            "timeout": 10,
+            "statusMessage": "Checking for a verdict"
+          }
+        ]
+      }
+    ]
+  }
+}
