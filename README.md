@@ -140,3 +140,7 @@ both carry `expected=PASS`. So neither finding above is an oversight; both are e
 not aggregated. See `hooks/README.md` for the rest of the per-hook gaps.
 
 Full detail on every problem this kit addresses, with sources, lives in [`BOOTSTRAP.md`](BOOTSTRAP.md).
+
+## License
+
+[CC0 1.0 Universal](LICENSE) — public domain dedication. Use, copy, modify and redistribute for any purpose, with no permission or attribution required.
