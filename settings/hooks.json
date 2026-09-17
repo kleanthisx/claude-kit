@@ -20,6 +20,12 @@
             "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/guard-plan-gate.ps1",
             "timeout": 30,
             "statusMessage": "Plan gate"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/guard-entity-read.ps1",
+            "timeout": 30,
+            "statusMessage": "Entity read gate"
           }
         ]
       },
@@ -89,6 +95,12 @@
             "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1",
             "timeout": 15,
             "statusMessage": "Loading rules summary"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1",
+            "timeout": 15,
+            "statusMessage": "Loading wiki"
           }
         ]
       }
@@ -101,6 +113,12 @@
             "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1",
             "timeout": 15,
             "statusMessage": "Reloading rules summary"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1",
+            "timeout": 15,
+            "statusMessage": "Reloading wiki"
           }
         ]
       }
@@ -117,5 +135,10 @@
         ]
       }
     ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/tools/statusline-usage.ps1",
+    "padding": 0
   }
 }

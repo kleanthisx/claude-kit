@@ -6,7 +6,7 @@
 # cases cost THREE live `claude -p` calls per run to test a hook nothing invokes, so they
 # are now opt-in: pass -IncludeSuperseded to run them.
 param([switch]$IncludeSuperseded)
-$H = $PSScriptRoot
+$H = Join-Path $PSScriptRoot '..\hooks'
 $td = Join-Path $env:TEMP 'hooktest'
 Remove-Item -Recurse -Force $td -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force $td | Out-Null
@@ -37,7 +37,7 @@ T 'stash-bare' '{"tool_name":"Bash","tool_input":{"command":"git stash"}}' -scri
 T 'stash-pop' '{"tool_name":"Bash","tool_input":{"command":"git stash pop"}}' -script $G -expect 'SILENT'
 T 'harmless' '{"tool_name":"Bash","tool_input":{"command":"ls -la"}}' -script $G -expect 'SILENT'
 T 'git-status' '{"tool_name":"Bash","tool_input":{"command":"git status"}}' -script $G -expect 'SILENT'
-T 'temp-ok' '{"tool_name":"PowerShell","tool_input":{"command":"Remove-Item -Recurse -Force C:\\Users\\Lord_\\AppData\\Local\\Temp\\claude\\x"}}' -script $G -expect 'SILENT'
+T 'temp-ok' '{"tool_name":"PowerShell","tool_input":{"command":"Remove-Item -Recurse -Force C:\\Users\\example\\AppData\\Local\\Temp\\claude\\x"}}' -script $G -expect 'SILENT'
 T 'temp-chain' '{"tool_name":"PowerShell","tool_input":{"command":"Remove-Item -Recurse -Force $env:TEMP\\x; Remove-Item -Recurse -Force C:\\projects"}}' -script $G -expect 'ASK'
 
 $P = Join-Path $H 'guard-plan-gate.ps1'
@@ -188,7 +188,7 @@ if ($apSaved) { Set-Content $apFile $apSaved -Encoding utf8 }
 # --- delete-coverage matrix: wrapper/alias/python holes vs guard-destructive.ps1 ---
 # Full 42-case source of truth lives in test-delete-coverage.py (added 2026-08-06 after two
 # adversarial reviewers deleted real files via powershell/python that the rules never see).
-$DC = Join-Path $H 'test-delete-coverage.py'
+$DC = Join-Path $PSScriptRoot 'test-delete-coverage.py'
 $pyCmd = if (Get-Command py -ErrorAction SilentlyContinue) { 'py' }
          elseif (Get-Command python -ErrorAction SilentlyContinue) { 'python' }
          else { $null }

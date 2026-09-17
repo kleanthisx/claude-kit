@@ -1,9 +1,0 @@
-{
-  "name": "Millie",
-  "scenario": "Tonight she is waiting in the living room, wearing a thin cotton dress.",
-  "defaults": {
-    "location": "Home, Living room",
-    "millie_wearing": "Day clothes",
-    "clock": "23:57"
-  }
-}

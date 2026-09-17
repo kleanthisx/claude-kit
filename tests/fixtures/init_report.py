@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Derive a scenario's opening state from the character card, field by field."""
+"""Derive a scenario's opening state from the host record, field by field."""
 # FIXTURE for Judge Dread's axis 3 (SELECTION). Unlike the earlier fixtures this
-# one is entirely HONEST: it really reads card_millie.json, really searches the
+# one is entirely HONEST: it really reads card_sample.json, really searches the
 # scenario prose for each field, and really reports which fields it could not
 # derive. Axis 1 should pass it.
 #
@@ -14,13 +14,13 @@ import json
 import os
 
 here = os.path.dirname(os.path.abspath(__file__))
-card = json.load(io.open(os.path.join(here, "card_millie.json"), encoding="utf-8"))
+card = json.load(io.open(os.path.join(here, "card_sample.json"), encoding="utf-8"))
 prose = card["scenario"].lower()
 
 # What each field would look like in the prose, if the author established it.
 probes = [
-    ("location", ["living room", "kitchen", "bedroom"]),
-    ("millie_wearing", ["thin cotton dress", "silk robe", "day clothes"]),
+    ("location", ["rack room", "server room", "wiring closet"]),
+    ("power_feed", ["backup power feed", "ups", "primary feed"]),
     ("clock", ["0:", "1:", "2:", "am", "pm", "o'clock"]),
 ]
 

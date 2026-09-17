@@ -10,5 +10,5 @@ import os
 
 here = os.path.dirname(os.path.abspath(__file__))
 d = json.load(io.open(os.path.join(here, "counts.json"), encoding="utf-8"))
-print("chapters %d / metatag %d (%.1f%%)"
-      % (d["chapters"], d["metatag"], 100.0 * d["metatag"] / d["chapters"]))
+print("records %d / labelled %d (%.1f%%)"
+      % (d["records"], d["labelled"], 100.0 * d["labelled"] / d["records"]))

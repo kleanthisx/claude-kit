@@ -10,6 +10,6 @@ import sys
 
 here = os.path.dirname(os.path.abspath(__file__))
 raw = subprocess.check_output([sys.executable, os.path.join(here, "inner_stats.py")])
-chapters, metatag = [int(x) for x in raw.decode().strip().split(",")]
-print("chapters %d / metatag %d (%.1f%%)"
-      % (chapters, metatag, 100.0 * metatag / chapters))
+records, labelled = [int(x) for x in raw.decode().strip().split(",")]
+print("records %d / labelled %d (%.1f%%)"
+      % (records, labelled, 100.0 * labelled / records))

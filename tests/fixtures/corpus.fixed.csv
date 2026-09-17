@@ -1,17 +1,17 @@
 id,title,tagged
-1,The Agency,yes
-2,Truth or Dare,yes
-3,Three Square Meals,yes
-4,Dear Diary,no
-5,Home for Horny Monsters,yes
-6,The Interview,yes
-7,There and Back Again,no
-8,The Arrangement,yes
-9,Forbidden,yes
-10,The Game,yes
+1,Backup Policy,yes
+2,Disk Alerts,yes
+3,Patch Window,yes
+4,Change Log,no
+5,Night Shift Handover,yes
+6,Access Review,yes
+7,Failover Drill,no
+8,Service Catalog,yes
+9,Firewall Rules,yes
+10,Capacity Plan,yes
 11,Untitled,no
-12,Second Chances,yes
-13,The Long Way Down,yes
-14,Winter Term,no
+12,Second Opinion,yes
+13,The Long Outage,yes
+14,Winter Freeze,no
 15,Quiet Hours,yes
-16,The Understudy,yes
+16,The Standby Node,yes

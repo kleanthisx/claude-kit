@@ -53,7 +53,11 @@ Bounds the **user-facing blast radius** of subagent spawning. Added after a doze
 - **To tune:** `$THRESHOLD` / `$WINDOW_MIN` at the top of the script. **To disable:** remove the Agent entry from settings hooks.
 - **Known gap (accepted):** the counter is per-session, so a spawn burst split across two sessions is not aggregated.
 
-## Measured coverage gaps in `guard-destructive.ps1` — FOUND, NOT FIXED
+## Measured coverage gaps in `guard-destructive.ps1` — FOUND, CLOSED 2026-09-16
+
+> Both gaps below are closed in the current `guard-destructive.ps1` (lines 83-154). Remaining limits:
+> a third-level script is not followed, imported modules are not read, script files over 512 KB are skipped.
+> The text below is the record of how they were found.
 
 Two holes, found after the guard stayed silent through four real deletions in a live project session and
 the user asked why. Verdicts below are from piping hook JSON into the script itself, not from reading the regex.

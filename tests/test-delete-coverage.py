@@ -1,7 +1,7 @@
-import json, subprocess, sys
+import json, os, subprocess, sys
 
-HOOK = r"C:\Users\Lord_\.claude\hooks\guard-destructive.ps1"
-REAL = r"C:\Users\Lord_\Documents\real-target"   # a non-temp path: temp-bypass must NOT apply
+HOOK = os.environ.get("KIT_HOOK_DIR") and os.path.join(os.environ["KIT_HOOK_DIR"], "guard-destructive.ps1") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "hooks", "guard-destructive.ps1")
+REAL = os.path.join(os.environ.get("USERPROFILE", os.path.expanduser("~")), "Documents", "real-target")   # a non-temp path: temp-bypass must NOT apply
 
 # (label, command, expected)  expected: "ASK" (must be caught) or "PASS" (must not fire)
 cases = [
@@ -57,8 +57,8 @@ cases = [
     # deletion is exactly as irreversible as recursive deletion, which this guard already asks on.
     # Noise measured before flipping: 2 prompts across the last 12 session transcripts.
     ("plain-rm-file",    'rm notes.txt', "ASK"),
-    ("path-with-rd",     'cat C:\\Users\\Lord_\\rd\\config.txt', "PASS"),
-    ("path-with-farm",   'cd C:\\Users\\Lord_\\projects\\farm-tools', "PASS"),
+    ("path-with-rd",     'cat C:\\Users\\example\\rd\\config.txt', "PASS"),
+    ("path-with-farm",   'cd C:\\Users\\example\\projects\\farm-tools', "PASS"),
     ("copy",             'copy a.txt b.txt', "PASS"),
 ]
 

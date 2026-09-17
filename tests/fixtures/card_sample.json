@@ -1,0 +1,9 @@
+{
+  "name": "web-01",
+  "scenario": "Tonight it is running in the rack room, on the backup power feed.",
+  "defaults": {
+    "location": "Datacenter, Rack room",
+    "power_feed": "Primary feed",
+    "clock": "23:57"
+  }
+}
