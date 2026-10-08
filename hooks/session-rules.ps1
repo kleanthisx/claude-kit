@@ -16,13 +16,14 @@
 $ErrorActionPreference = 'SilentlyContinue'
 
 # ---------------------------------------------------------------- inputs
-$evt = 'SessionStart'; $cwd = ''
+$evt = 'SessionStart'; $cwd = ''; $transcript = ''
 try {
   $raw = [Console]::In.ReadToEnd()
   if ($raw) {
     $j = $raw | ConvertFrom-Json
     if ($j.hook_event_name) { $evt = [string]$j.hook_event_name }
     if ($j.cwd)             { $cwd = [string]$j.cwd }
+    if ($j.transcript_path) { $transcript = [string]$j.transcript_path }
   }
 } catch {}
 
@@ -35,10 +36,17 @@ $rules = ''
 if (Test-Path $rulesPath) { $rules = [System.IO.File]::ReadAllText($rulesPath) }
 
 # ---------------------------------------------------------------- locate the memory directory
-# Memory is project-scoped: <ClaudeHome>\projects\<encoded-cwd>\memory. The encoding replaces every
-# non-alphanumeric character with '-', so C:\Users\X\projects -> C--Users-X--projects.
+# Memory is project-scoped: <ClaudeHome>\projects\<encoded-launch-dir>\memory. The encoding replaces
+# every non-alphanumeric character with '-', so C:\Users\X\projects -> C--Users-X--projects.
+# The session's memory sits beside its transcript, so transcript_path decides first. The cwd is only a
+# fallback: after a cd into a subproject the cwd names a DIFFERENT memory dir, and a compaction then
+# re-injects that project's files instead of the session's directives (found 2026-10-08).
 $memDir = ''
-if ($cwd) {
+if ($transcript) {
+    $try = Join-Path (Split-Path -Parent $transcript) 'memory'
+    if (Test-Path $try) { $memDir = $try }
+}
+if (-not $memDir -and $cwd) {
     $enc = ($cwd -replace '[^A-Za-z0-9]', '-')
     $try = Join-Path $claudeHome "projects\$enc\memory"
     if (Test-Path $try) { $memDir = $try }

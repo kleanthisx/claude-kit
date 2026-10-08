@@ -123,26 +123,37 @@ carry `expected=PASS`. So neither finding above is an oversight; both are encode
 
 `PreToolUse` on `Edit|Write|NotebookEdit`, alongside `guard-plan-gate.ps1`.
 
-**Denies an edit to a file whose owning wiki entity has not been read this session.** Ownership comes
-from the `owns:` line of each `docs/wiki/entities/*.md` header — no separate registry to drift. Proof
-of reading comes from the session transcript (`transcript_path`): a `"file_path"` mentioning the
-entity file anywhere in it counts.
+**Denies a change to a file until every wiki page directly related to it has been read this
+session:** every page in `docs/wiki/entities/` or `docs/wiki/ledgers/` whose `owns:` line covers the
+file (one file can hold several components), every page named on their `depends:` and `dependents:`
+lines, and every page whose `depends:` line names one of them. Ownership comes from the `owns:` lines,
+with no separate registry to drift, read by the same rule as `wiki-v2/coverage.py`: an entry is a path
+relative to the project root and owns that exact file, everything under it when it is a folder (trailing
+`/` optional), or what it matches as a glob (`*`, `?`); a path with spaces is backtick-quoted; a bare
+word counts when it contains `/ \ . *` or names a FILE at the project root (`Makefile`); a `path:line`
+locator is a citation and claims nothing; page names are ignored; a bare name does not match at other
+depths (`README.md` owns the root README only). Proof of reading comes from the session transcript
+(`transcript_path`): successful Read results of the page's current version that together contain every
+numbered line (chunked reads add up). A request, a grep hit, a failed read or a read older than the
+page does not count. `NotebookEdit` is gated through its `notebook_path`.
 
-**Deliberately permissive at the edges.** It denies only when the project has `docs/wiki/entities/`,
-**and** the target is claimed by an `owns:` line, **and** the entity is absent from the transcript.
-Files under `docs/wiki/` and `docs/history/` are never gated — you must always be able to fix the
-map. A false deny costs real work; a false allow costs one unread page.
+**Deliberately permissive at the edges.** It denies only when the target is inside a project that has
+`docs/wiki/entities/` **and** some page owns it **and** a transcript is available to check. Files under
+`docs/wiki/` and `docs/history/` are never gated: you must always be able to fix the map. One addition: a
+NEW script (`.py .ps1 .sh .js .ts .bat ...`) that no page owns is denied on `Write`, the shape of an ad
+hoc replacement runner. Shell edits are outside this hook.
 
 **Why it exists:** benchmarks that test *obedience* rather than recall have found the governing
 document goes unopened in the large majority of violations, even when it is one grep away. Caps and
 good intentions do not fix that; removing the decision from the model's discretion does.
 
 - Disarm for a session: `$env:WIKI_GATE = 'off'`
-- Tests: `powershell -NoProfile -ExecutionPolicy Bypass -File test-entity-read.ps1` — 9 cases
-  (owned/unowned, read/unread, wiki, history, no-entities project, disarm).
-- Design: see this workspace's own wiki-v2 design notes, if kept, for the fuller rationale and the
-  measured obedience-benchmark figures.
-
+- Tests: `powershell -NoProfile -ExecutionPolicy Bypass -File tests\test-entity-read.ps1`: 40 cases on
+  the fixture project and a read-set project built at run time (complete, partial, failed, stale and
+  chunked reads; owners, parts and users; two owners; ledgers; extension-less files; globs; quoted,
+  backslash and slash-less folder paths; citations; files outside the project; NotebookEdit; no
+  transcript; disarm).
+- Design: `wiki-v2/DESIGN.md` section 13 and `wiki-v2/WIKI-PRIMER.md` ruling 6.
 
 ## load-wiki.ps1 — the always-loaded layer
 

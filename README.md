@@ -126,7 +126,7 @@ project (`hooks/README.md`); no-op everywhere else.
    claims and substituted methods. `/judge quiet` or `/judge off` if a given machine shouldn't pay it.
 3. **Run the suites.** `tests\test-hooks.ps1` (86 PASS / 0 FAIL / 1 SKIP as of this writing — the
    SKIP is `verify-done.ps1`'s superseded cases, opt in with `-IncludeSuperseded`).
-   `tests\test-entity-read.ps1` (9 PASS / 0 FAIL). `python tests\test-delete-coverage.py` (42 cases,
+   `tests\test-entity-read.ps1` (40 cases, 0 FAIL). `python tests\test-delete-coverage.py` (42 cases,
    `ALL GREEN`). `tests\test-judge-dread.ps1` needs the CLI and makes live model calls — not run as
    part of finishing this repo.
 4. **`verify-done.ps1` is superseded** by Judge Dread and is shipped as a record only. Wiring both

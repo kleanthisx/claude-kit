@@ -279,7 +279,7 @@ else {
 Say ""
 Say "Next:"
 Say "  1. powershell -File tests\test-hooks.ps1          (counts drift as cases are added -- 0 FAIL is the bar)"
-Say "  2. powershell -File tests\test-entity-read.ps1    (9 PASS / 0 FAIL)"
+Say "  2. powershell -File tests\test-entity-read.ps1    (40 cases, 0 FAIL)"
 Say "  3. powershell -File tests\test-judge-dread.ps1    (needs the claude CLI on PATH)"
 Say "  4. Start a session and confirm RULES.md arrives at SessionStart."
 Say "  5. Judge Dread costs one 'claude -p' per turn. '/judge quiet' or '/judge off' if that"

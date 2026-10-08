@@ -42,11 +42,15 @@ NAME_RE = re.compile(r"^#\s*([a-z]+:[a-z0-9-]+/[a-z0-9-]+)\s*$", re.M)
 OVERVIEW_FIELDS = ["aka", "state", "verified"]
 FIELD_RE = re.compile(r"^([a-z]+):\s{1,}(.*)$")
 # a dead end or open question in a body: **name** - DISCARDED ... / **name** - OPEN ? ...
-DISC_RE = re.compile(r"^\*\*([a-z0-9-]+)\*\*\s*[-—]\s*(DISCARDED[^\n]*|OPEN \?[^\n]*)", re.M)
+# [ \t]* not \s*: the match must not cross a line end
+DISC_RE = re.compile(r"^\*\*([a-z0-9-]+)\*\*[ \t]*[-—][ \t]*(DISCARDED[^\n]*|OPEN \?[^\n]*)", re.M)
 REF_RE = None   # built in load() from the kinds actually present, so any domain's kinds work
 ANY_REF = re.compile(r"\b[a-z]+:[a-z0-9-]+/[a-z0-9-]+")   # any kind: for depends:/dependents:, where a typo must show
 CODE_SPAN = re.compile(r"`[^`\n]*`")                       # text in backticks is not a page reference
-ENTRY_END = re.compile(r"\n[ \t]*\n|\n#|\n\*\*")           # an entry ends at a blank line, a heading or the next entry
+# An entry ends at a blank line, a heading or the next entry. The next entry is a `**name** -` line, not any
+# line opening in bold: a sentence can wrap onto a line that starts with bold (measured on a 132-page wiki,
+# 2026-10-08: a bare \n\*\* cut 6 decision gists and 2 map rows mid-sentence). DEC_RE's gist uses the same.
+ENTRY_END = re.compile(r"\n[ \t]*\n|\n#|\n\*\*[a-z0-9-]+\*\*[ \t]*[-—]")
 
 
 def cell(s):
@@ -236,12 +240,13 @@ def names(ents):
     return "\n".join(out)
 
 
-DEC_RE = re.compile(r"^\*\*([a-z][a-z0-9]*(?:-[a-z0-9]+)+)\*\*\s*[-—]\s*"
-                    # [ \t]* not \s*: a status at the end of its line must not reach into the next line
+# [ \t]* not \s* around the dash and after the status: a match must not cross a line end, so a
+# status at the end of its line does not reach into the next line
+DEC_RE = re.compile(r"^\*\*([a-z][a-z0-9]*(?:-[a-z0-9]+)+)\*\*[ \t]*[-—][ \t]*"
                     r"(PROVEN|DISCARDED|STANDING|OPEN)[ \t]*[✓✗⚖?]?[ \t]*[-—]?[ \t]*"
-                    # the gist stops at the entry's end (blank line, heading, next entry), so a short
-                    # entry does not swallow the section after it
-                    r"((?:(?!\n[ \t]*\n|\n#|\n\*\*).){0,150})",
+                    # the gist stops at the entry's end (blank line, heading, next entry; see ENTRY_END),
+                    # so a short entry does not swallow the section after it
+                    r"((?:(?!\n[ \t]*\n|\n#|\n\*\*[a-z0-9-]+\*\*[ \t]*[-—]).){0,150})",
                     re.M | re.S)
 
 
@@ -251,7 +256,8 @@ def decisions(ents):
         # entries in the page's history file are listed, tagged: superseded or moved out, not in force
         for text, tag in ((e["text"], ""), (e["htext"], " (archived)")):
             for m in DEC_RE.finditer(text):
-                gist = re.sub(r"\s+", " ", m.group(3)).strip()
+                # a leading dash, ? or mark left after the status is not part of the gist (as in discarded())
+                gist = re.sub(r"\s+", " ", m.group(3)).strip().lstrip(" -—?✓✗⚖")
                 rows.append((e["name"], m.group(1), m.group(2) + tag, cell(gist[:130])))
     out = ["# DECISIONS - the one-line ledger",
            "",

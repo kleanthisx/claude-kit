@@ -207,7 +207,8 @@ executions at millisecond cost `[a9]`.
    it: it names lines, not decisions. Free.
 3. **A hook gate** — `PreToolUse` on edit/write: was the owning entity's file read this session? The
    file→entity map it needs is the `owns:` line. **BUILT** as
-   `~/.claude/hooks/guard-entity-read.ps1` (+ `~/.claude/hooks/test-entity-read.ps1`, 9/9 passing).
+   `~/.claude/hooks/guard-entity-read.ps1` (+ `tests/test-entity-read.ps1`: 9 cases when this was written,
+   40 as of 2026-10-08, when the gate came to require the whole read set; see `hooks/README.md`).
    Ownership from `owns:`, proof-of-reading from the session transcript, permissive at every edge,
    disarm with `$env:WIKI_GATE='off'`. It is ~90 lines and needed no new registry — which is the
    payoff of putting `owns:` in the header in the first place.

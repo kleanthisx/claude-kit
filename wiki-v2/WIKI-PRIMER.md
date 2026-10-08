@@ -92,9 +92,12 @@ run:         (optional, runnable things only) the command that runs it
 Field rules:
 
 - **Empty is written `-` or an em dash, never omitted.** A missing field is a lint error.
-- **`owns:`** lists paths relative to the project root: a file, a folder ending in `/`, or a glob
-  (backtick-quote a path with spaces). A bare word counts as a path when it contains `/`, `.` or `*`, or names
-  something at the project root (`Makefile`); other words on the line are treated as prose. One file may be
+- **`owns:`** lists paths relative to the project root. An entry owns that exact file, everything under it
+  when it is a folder (trailing `/` optional), or what it matches as a glob (`*`, `?`); backtick-quote a
+  path with spaces; backslashes count as `/`. A bare word counts as a path when it contains `/`, `.` or
+  `*`, or names a FILE at the project root (`Makefile`); a folder needs its `/`, so a prose word that
+  happens to name a folder claims nothing. A path with a `:line` locator is a citation and claims nothing.
+  A bare name does not match at other depths: `README.md` owns the root README only. One file may be
   owned by several pages (a file that holds several components). Every file in the project is owned by at
   least one page; `coverage.py` lists the ones that are not, and `owns:` entries that match no file.
 - **`depends:`** comes from evidence: an import, a file or table read, a call. Cite `file:line` in the body.
@@ -234,15 +237,13 @@ The kit's `/enter` and `/wrap` skills (`skills/enter`, `skills/wrap`) do these s
   imported surfaces in context and does not read them again. After a compaction, re-read them.
 - **claude.ai:** upload `OVERVIEW.md`, `NAMES.md`, `DISCARDED.md` and the doctrine files as project files;
   regenerate and re-upload after the pages change. Upload or paste a page when the work reaches it.
-- **With the full kit installed**, hooks enforce part of this: `load-wiki.ps1` re-injects the surfaces at
-  session start and after every compaction, and `guard-entity-read.ps1` blocks an edit to a file until the
-  first page found that owns it has been read this session. Its limits: it recognises only `owns:` entries
-  ending in `/` or in `.py .js .md .ps1 .css .html .json .tsv .txt .jsonl`, so other files are not gated
-  (and `src/app.ts` reads as the folder `src/`); it searches `entities/` only (not `ledgers/`) and reads
-  only the first 14 lines of a page; it counts a page as read when its file name appears in any file path
-  read this session, so a partial read passes; it does not check the other owners or the `depends:` and
-  `dependents:` pages. That part of ruling 6, and everything without the kit, are rules Claude follows on
-  its own: ask for the read receipt when it matters.
+- **With the full kit installed**, hooks enforce this: `load-wiki.ps1` re-injects the surfaces at session
+  start and after every compaction, and `guard-entity-read.ps1` blocks an edit (Edit, Write, NotebookEdit) to
+  a file until its whole read set (ruling 6) has complete, successful Reads of each page's current version
+  this session (chunked reads add up). It reads `owns:` by the same rule as `coverage.py` (section 3.1),
+  searches `entities/` and `ledgers/`, and looks for the header in a page's first 14 lines. It lets the edit
+  through when no transcript is available to check, and it does not see edits made through the shell. Without the kit, ruling 6 is a rule Claude follows on its own: ask for the read receipt when it
+  matters.
 - **Commands:** `python` here means the Python 3 command; on macOS and Linux that is usually `python3`.
   `generate.py` writes the surfaces even when lint finds errors and exits 0; `generate.py --lint` is the
   pass/fail check.
