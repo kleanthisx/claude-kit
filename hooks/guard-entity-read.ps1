@@ -139,7 +139,7 @@ foreach ($f in $allPages) {
     $itsDeps = ($head | Where-Object { $_ -cmatch '^depends:' }) -join ' '
     $usesOwner = $false
     foreach ($on in $ownerNames) { if ($itsDeps -cmatch ('(^|[^a-z0-9/-])' + [regex]::Escape($on) + '($|[^a-z0-9-])')) { $usesOwner = $true; break } }
-    if ($refs -contains $first -or $usesOwner) {
+    if ($refs -ccontains $first -or $usesOwner) {
         $full = [System.IO.Path]::GetFullPath($f.FullName)
         if (-not $required.ContainsKey($full.ToLowerInvariant())) {
             $required[$full.ToLowerInvariant()] = @{ Path = $full; Name = $first }
