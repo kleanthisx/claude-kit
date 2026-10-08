@@ -26,10 +26,19 @@ ls docs/wiki/entities 2>/dev/null && echo V2 || echo V1
 1. **Regenerate first.** `python docs/wiki/generate.py` — the four surfaces are **generated and
    gitignored**, so on a fresh clone they do not exist at all until this runs. Report its entity
    count, errors and warnings; errors mean the wiki is broken, not that you should proceed.
-2. **You may already have them.** `<CLAUDE_HOME>/hooks/load-wiki.ps1` injects `OVERVIEW.md`,
-   `DISCARDED.md`, `NAMES.md`, `DECISIONS.md` and `doctrine/` at SessionStart and after every
-   compaction, if that hook is installed. If that injection is in context, **do not re-read those
-   files** — say so and move on.
+2. **Verify delivery, not just installation.** `OVERVIEW.md`, `DISCARDED.md`, `NAMES.md` and
+   `doctrine/` count as loaded only if their content is actually in context, from one of:
+   - `<CLAUDE_HOME>/hooks/load-wiki.ps1`, at SessionStart and after compaction. Depending on the
+     installed version it injects one block, or numbered `WIKI PART n/N SHA256 ...` parts: then
+     count all `N` parts and confirm their SHA256 labels agree.
+   - `@docs/wiki/...` import lines in the project's `CLAUDE.md` (no hooks installed).
+
+   If they are in context, do not read them again. If they are absent, incomplete, inconsistent, or
+   you cannot verify them, read those files in full with `Read`; if a tool truncates, continue by
+   offset until the end. A grep hit, directory listing, first lines, or a `Read` request without its
+   full result is not a read. Say which path was actually taken. `DECISIONS.md` is **on demand**
+   (operator, 2026-10-07): the one-block `load-wiki.ps1` injects it; otherwise do not read it at
+   orientation; grep it for a decision by name when one is needed.
 3. **Read `docs/wiki/TASKS.md`** — it is the next-session pointer in v2. `NEXT.md` is a redirect stub.
 4. **Do not read `docs/history/`.** Ever, at orientation. It is the frozen record, cited by path from
    entity bodies when a specific claim needs checking.
@@ -46,9 +55,11 @@ means ask**, not guess.
 Also read a next-session pointer if present: `docs/wiki/NEXT.md` (or a "Start here next" block in `decisions.md`) — `/wrap` leaves this for you.
 
 ### 3. Follow the pointed files
-Read **only** the deep files the ledger explicitly names (specs, run docs, sub-project CLAUDE.md). Do not read the whole tree — the ledger points; you follow the pointers.
+Read **only** the deep files the ledger explicitly names (specs, run docs, sub-project CLAUDE.md),
+but read each selected file whole. Do not read the whole tree — the ledger points; you follow the
+pointers. Never substitute grep, a preview, or first lines for a selected file's full contents.
 
-**In v2 the pointer is the entity.** Resolve the thing you are about to touch to `kind:namespace/name`, then read that one entity file whole — header, decisions, discards, invariants. `guard-entity-read.ps1` will block an edit to a file whose owning entity you have not read, so this is not optional anyway.
+**In v2 the pointer is the entity.** Resolve the thing you are about to touch to `kind:namespace/name`, then read that one entity file whole — header, decisions, discards, invariants — and, before changing a file, every page that owns it plus the pages on their `depends:` and `dependents:` lines. If `guard-entity-read.ps1` is installed it blocks an edit to a file until a page that owns it has been read; without it, the rule still holds.
 
 ### 4. Check git + freshness
 ```bash

@@ -10,7 +10,8 @@ Close a session the same way in every project so the next `/enter` can pick up c
 
 **Guardrails (from `~/CLAUDE.md`):**
 - **Never commit, push, or run any irreversible/outward git op without an explicit "yes".** Propose it, then wait.
-- **Stamp dates from the real clock**, never from memory: `Get-Date -Format 'yyyy-MM-dd'`.
+- **Stamp dates from the real clock**, never from memory: `Get-Date -Format 'yyyy-MM-dd'` (PowerShell) or
+  `date +%F` (macOS, Linux).
 - Report as evidence: "ran `<cmd>` → `<output>`". Do not claim a write you did not make.
 - Ledger writes are additive — safe without a gate. The **commit** is the only gated step.
 - **In a v2 wiki, never hand-edit a generated surface** (`OVERVIEW.md`, `DECISIONS.md`,
@@ -27,7 +28,7 @@ git status -s
 git diff --stat
 git log --oneline -5
 ```
-From that + the session's actions, write a short **what-happened** list (include dead-ends — a rejected approach is worth recording). Get the date: `Get-Date -Format 'yyyy-MM-dd'`.
+From that + the session's actions, write a short **what-happened** list (include dead-ends — a rejected approach is worth recording). Get the date: `Get-Date -Format 'yyyy-MM-dd'` (PowerShell) or `date +%F`.
 
 ### 3. Which wiki is this? Branch here
 
@@ -103,16 +104,23 @@ Report the four surface sizes, the entity count, and **any errors or warnings**.
   it** — the caps are the only thing between this and the bloated entry set v2 replaced.
 - **`verified:` past the two-week horizon** → a warning worth surfacing to the operator.
 
-### 6v2. Update `TASKS.md` — it is the pointer now
-`NEXT.md` is a redirect stub; `TASKS.md` carries the next actions. Refresh its header block with:
-- date and time from the real clock
-- one paragraph on what this session did
-- what is uncommitted **and whose it is** (another window's work is not yours to commit)
-- anything primed to run and what it is blocked on
+### 6v2. Update `TASKS.md` — live tasks only (operator, 2026-10-07)
+`NEXT.md` is a redirect stub; `TASKS.md` carries the next actions, and **only live ones**. It is read
+at every `/enter`; on 2026-10-07 it had grown to 84 KB because each wrap prepended a session block
+and left closed items in place.
+- **Move** a task finished or dropped this session to `docs/wiki/archive/TASKS-history.md` (newest
+  first, with the date and the evidence or reason), and record its result in the owning entity. No
+  `- [x]` lines stay in `TASKS.md`. Never leave a record only in git or a commit message: an
+  inaccessible record does not exist.
+- **Add** a line for anything the session surfaced: `- [ ] what — entity — [date set]`. Check it
+  is not already there.
+- **No session narrative.** What the session did goes into the entities, and anything that leaves
+  a page goes to that page's named history file, linked from it. If the next session must know what is uncommitted **and whose it is**, or
+  what is primed to run, write ONE short `Session state` block under the header that **replaces**
+  the previous one: a field, never an append.
 
-Close any task finished this session (`- [x]` with the evidence), and add tasks for anything the
-session surfaced. An entity's `open:` line carries *conditions*; `TASKS.md` carries *intended
-actions*; `IDEAS.md` carries the unevaluated. Keep them distinct.
+An entity's `open:` line carries *conditions*; `TASKS.md` carries *intended actions*; `IDEAS.md`
+carries the unevaluated. Keep them distinct.
 
 ---
 

@@ -26,8 +26,18 @@ tools/                render_session.py, statusline-usage.ps1, tally-usage.py --
 settings/             hooks.json + permissions.json fragments merged into settings.json by install.ps1
 tests/                test-hooks.ps1, test-entity-read.ps1, test-delete-coverage.py, test-judge-dread.ps1
 templates/            REFERENCE ONLY -- never installed; see BOOTSTRAP.md "Adapting at a new site"
-wiki-v1/, wiki-v2/    REFERENCE ONLY -- never installed; two wiki designs to build from, not copy
+wiki-v1/, wiki-v2/    never installed; two wiki designs. wiki-v2/ also holds the primer, generator and
+                      coverage check that a project copies into docs/wiki/
+portable/             the kit without the installer: any OS, a work machine, claude.ai
 ```
+
+## Without the installer
+
+Another operating system, a machine you do not control, or claude.ai: start at
+[`portable/README.md`](portable/README.md). It holds the working agreement and the method in one file
+([`portable/CLAUDE.md`](portable/CLAUDE.md)) and points to the wiki primer, generator and coverage
+check in `wiki-v2/` ([`WIKI-PRIMER.md`](wiki-v2/WIKI-PRIMER.md)). It runs no hooks: the rules hold
+because Claude follows them, not because a gate enforces them.
 
 ## Install
 
