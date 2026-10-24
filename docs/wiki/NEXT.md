@@ -1,14 +1,44 @@
 # NEXT — start here
 
-Last updated 2026-09-16 (session-close addendum; supersedes the version of this file written
-earlier today). Read [ACTION-LOG.md](ACTION-LOG.md) for the full reasoning behind any item below
-before changing it.
+Last updated 2026-10-24.
 
-**State of the repos as of this addendum:** all three repos — `claude-kit`, `claude-hooks`,
-`shadowguard` — are clean and pushed. Live hooks on this machine are in sync with the repo
-copies (verified by diff).
+**State:** local `main` (full history, not pushed, no upstream) carries the 2026-10-24 release prep: memory
+tier level with live (86 files), live hooks/skills synced, commissar as an optional `-WithCommissar` layer.
+`transfer` 53c8cd0 = `origin/main` on https://github.com/kleanthisx/claude-kit — PUBLIC, CC0-1.0 — is the
+2026-10-08 state. To send changes: commit on main -> build the transfer tree WITHOUT `docs/research/`
+(third-party corpus, licences unchecked) and without untracked `conclave/` -> `git commit-tree <tree> -p
+transfer` -> `git branch -f transfer <sha>` -> denylist scan -> fresh adversarial review -> `git push origin
+transfer:main` (outward-facing: operator's go).
 
-## Open items, most actionable first
+## Open items from 2026-10-24, most actionable first
+
+A. **Push the new transfer** once the operator says go (second candidate after the review fixes; re-review first); then have the friend run `install.ps1 -WhatIf`
+   first, then the real install, then the four free suites. Nothing is verified off this machine yet.
+B. **Conclave ships** (operator, 2026-10-24: "conclave stays in"). It gets the commissar treatment:
+   tracked, council/db/project-root parameterised, an installer switch, a README section; then the
+   candidate is rebuilt and re-reviewed.
+C. **Ekbasis** ships as our `SUMMARY.md` + `ROWS.md` + `SOURCES.md` with the academic reference; the copied
+   third-party files stay home (operator, 2026-10-24). The transfer filter drops exactly those files.
+D. **Live commissar drift:** the kit's `service.py`, `talk.py`, `up.py`, `commissar-gate.py` now derive
+   their paths from the install location; the live `~/.claude/commissar` copies still hardcode this
+   machine. Copy the kit versions over (same behaviour here) or the next sync diffs them again.
+E. **Live `hooks/test-hooks.ps1` vs kit `tests/test-hooks.ps1`:** same 50 cases, different `$H` root and
+   one example path; keep syncing live -> kit with that one substitution.
+F. **Stray untracked copies** in `hooks/` (`test-entity-read.ps1`, `guard-entity-read.ps1.from-live-2026-10-08`,
+   both older than the tracked files): delete or move to an archive; they never ship (untracked) but confuse a diff.
+
+## Open items carried from 2026-09-17
+
+A. **Install at the work site and run the suites there** — nothing is verified off this machine:
+   `install.ps1 -WhatIf`, real install, tests, then `test-judge-dread.ps1` once `claude` is on PATH
+   (paid calls; never run this session).
+B. **Stale "FOUND, NOT FIXED" heading** was corrected only in claude-kit `hooks/README.md`; the live
+   `~/.claude/hooks/README.md` and the `claude-hooks` repo still carry it.
+C. **Uninstall leaves `hooks/fixtures/` behind** (file-only removal loop) — noted in BOOTSTRAP, not fixed.
+D. **Agent budgets:** set token/tool caps in every agent prompt and send one shared conventions bundle
+   instead of letting each agent re-read it.
+
+## Carried from 2026-09-16
 
 1. **Verify the 45-directive injection and the wholesale/defaults-discarded precedence header in
    a real session — cheap, concrete test available.** Both changes (see ACTION-LOG units 2, 10,
@@ -35,7 +65,7 @@ copies (verified by diff).
    unilaterally — needs a yes (leave as head-only) or no (find a different way to label the turn)
    before it's considered closed.
 
-4. **personal-memory-off-github remains practical, not absolute.** 20 project-state files were
+4. **personal-memory-off-github — CLOSED 2026-09-17** by deleting and recreating the GitHub repo (only the curated `transfer` history exists remotely). Original note: 20 project-state files were
    removed from `claude-kit`'s git history via amend + force-with-lease; GitHub may still hold
    orphaned objects until its own GC runs. The operator declined the delete-and-recreate
    alternative that would close this fully — no further action planned unless revisited.

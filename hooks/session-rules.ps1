@@ -1,5 +1,5 @@
 #requires -version 5
-# session-rules.ps1 - inject the standing directives into context at session start.
+# session-rules.ps1 - emit one numbered part of the standing directives.
 #
 # 2026-09-16: this used to inject RULES.md ONLY -- a 3.6 KB SUMMARY of the directives. The failure
 # that produced this rewrite: with the summary in context and MEMORY.md's one-line index auto-loaded,
@@ -8,12 +8,13 @@
 # "recite IS USED AS MEANS OF PROVING YOU READ THE FILE, NOT CAT FILE." A summary cannot prove a read.
 # So the files themselves are now injected, not a digest of them.
 #
-# Wired on SessionStart (init) and PostCompact (re-inject after compaction -- measured: constraint
-# violations rise 0% -> 30% after compaction when the policy is dropped, arXiv 2606.22528).
+# Wired in parallel parts on SessionStart. Claude Code fires SessionStart again with source=compact.
 #
 # Cost, measured 2026-09-16: 45 core files = ~100 KB = ~25k tokens per injection. Deliberate.
 # Tune it with inject-exclude.txt (below) rather than by going back to a summary.
-$ErrorActionPreference = 'SilentlyContinue'
+param([Parameter(Mandatory=$true)][ValidateRange(0,31)][int]$Part)
+$ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'context-part.ps1')
 
 # ---------------------------------------------------------------- inputs
 $evt = 'SessionStart'; $cwd = ''; $transcript = ''
@@ -54,8 +55,12 @@ if (-not $memDir -and $cwd) {
 if (-not $memDir) {
     # Fallback: exactly one memory dir under projects -> unambiguous, use it. More than one -> skip
     # rather than guess which project's directives belong to this session.
-    $cands = @(Get-ChildItem (Join-Path $claudeHome 'projects') -Directory |
-               ForEach-Object { Join-Path $_.FullName 'memory' } | Where-Object { Test-Path $_ })
+    $projectsDir = Join-Path $claudeHome 'projects'
+    $cands = @()
+    if (Test-Path $projectsDir) {
+        $cands = @(Get-ChildItem $projectsDir -Directory |
+                   ForEach-Object { Join-Path $_.FullName 'memory' } | Where-Object { Test-Path $_ })
+    }
     if ($cands.Count -eq 1) { $memDir = $cands[0] }
 }
 
@@ -136,29 +141,5 @@ if ($rules) {
 
 $context = $sb.ToString()
 
-# Safety valve: never let a runaway memory directory blow the context window. 400 KB is ~4x the
-# measured 2026-09-16 size, so it only trips if something has gone wrong.
-if ($context.Length -gt 400000) {
-    $context = $context.Substring(0, 400000) +
-        "`n`n[TRUNCATED at 400 KB - the memory directory is larger than expected. Directives after this" +
-        " point were NOT injected; read them from disk before relying on them.]`n"
-}
-
-# ---------------------------------------------------------------- emit
-$payload = [pscustomobject]@{
-  hookSpecificOutput = [pscustomobject]@{
-    hookEventName     = $evt
-    additionalContext = $context
-  }
-  suppressOutput = $true
-}
-# PURE ASCII out: JSON allows \uXXXX inside strings, so the object is unchanged but no console
-# codepage between here and Claude Code can damage it. The directive files carry em-dashes, arrows
-# and quotes well outside ASCII.
-$json = $payload | ConvertTo-Json -Depth 6 -Compress
-$out = New-Object System.Text.StringBuilder
-foreach ($ch in $json.ToCharArray()) {
-  if ([int]$ch -gt 126) { [void]$out.AppendFormat('\u{0:x4}', [int]$ch) } else { [void]$out.Append($ch) }
-}
-[Console]::Out.Write($out.ToString())
+Write-KitContextPart -Context $context -Kind 'MEMORY' -EventName $evt -Part $Part -PartCount 32
 exit 0

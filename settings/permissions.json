@@ -32,9 +32,6 @@
       "Bash(Move-Item:*)",
       "Bash(New-Item:*)",
       "Bash(Start-Process:*)",
-      "Bash(.venv-win\\Scripts\\python:*)",
-      "Bash(.venv-win\\Scripts\\python.exe:*)",
-      "Bash(.venv-win\\Scripts\\pip:*)",
       "WebSearch",
       "Read",
       "Write",
@@ -45,12 +42,7 @@
       "Bash(py --version)",
       "Bash(py *)",
       "Bash(netstat -ano)",
-      "WebFetch(domain:www.youtube.com)",
-      "WebFetch(domain:gist.github.com)",
-      "WebFetch(domain:gist.githubusercontent.com)",
-      "Bash(cd *)",
-      "WebFetch(domain:youtubetotranscript.com)",
-      "WebFetch(domain:en.wikipedia.org)"
+      "Bash(cd *)"
     ],
     "deny": [
       "Bash(rm -rf /)",

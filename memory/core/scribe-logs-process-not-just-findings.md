@@ -5,7 +5,6 @@ metadata:
   node_type: memory
   type: feedback
   modified: 2026-09-13T06:42:27.614Z
-  originSessionId: e13cd0c7-a27e-454e-a43f-39d75c4e7936
 ---
 
 The content requirement, independent of who writes it: one narrative unit per **decision point**, in "we" voice —

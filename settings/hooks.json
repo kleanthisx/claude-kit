@@ -2,6 +2,17 @@
   "hooks": {
     "PreToolUse": [
       {
+        "matcher": "Agent|Bash|PowerShell|Edit|Write|NotebookEdit|WebFetch|WebSearch|Workflow|Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/usage-gate.ps1",
+            "timeout": 19000,
+            "statusMessage": "Usage gate"
+          }
+        ]
+      },
+      {
         "matcher": "Bash|PowerShell",
         "hooks": [
           {
@@ -85,6 +96,16 @@
             "statusMessage": "Auditing completion claim"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/keep-going.ps1",
+            "timeout": 30,
+            "statusMessage": "Unattended keep-going gate"
+          }
+        ]
       }
     ],
     "SessionStart": [
@@ -92,33 +113,435 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1",
-            "timeout": 15,
-            "statusMessage": "Loading rules summary"
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 0",
+            "timeout": 30,
+            "statusMessage": "Loading memory 1/32"
           },
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1",
-            "timeout": 15,
-            "statusMessage": "Loading wiki"
-          }
-        ]
-      }
-    ],
-    "PostCompact": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1",
-            "timeout": 15,
-            "statusMessage": "Reloading rules summary"
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 1",
+            "timeout": 30,
+            "statusMessage": "Loading memory 2/32"
           },
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1",
-            "timeout": 15,
-            "statusMessage": "Reloading wiki"
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 2",
+            "timeout": 30,
+            "statusMessage": "Loading memory 3/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 3",
+            "timeout": 30,
+            "statusMessage": "Loading memory 4/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 4",
+            "timeout": 30,
+            "statusMessage": "Loading memory 5/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 5",
+            "timeout": 30,
+            "statusMessage": "Loading memory 6/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 6",
+            "timeout": 30,
+            "statusMessage": "Loading memory 7/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 7",
+            "timeout": 30,
+            "statusMessage": "Loading memory 8/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 8",
+            "timeout": 30,
+            "statusMessage": "Loading memory 9/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 9",
+            "timeout": 30,
+            "statusMessage": "Loading memory 10/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 10",
+            "timeout": 30,
+            "statusMessage": "Loading memory 11/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 11",
+            "timeout": 30,
+            "statusMessage": "Loading memory 12/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 12",
+            "timeout": 30,
+            "statusMessage": "Loading memory 13/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 13",
+            "timeout": 30,
+            "statusMessage": "Loading memory 14/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 14",
+            "timeout": 30,
+            "statusMessage": "Loading memory 15/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 15",
+            "timeout": 30,
+            "statusMessage": "Loading memory 16/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 16",
+            "timeout": 30,
+            "statusMessage": "Loading memory 17/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 17",
+            "timeout": 30,
+            "statusMessage": "Loading memory 18/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 18",
+            "timeout": 30,
+            "statusMessage": "Loading memory 19/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 19",
+            "timeout": 30,
+            "statusMessage": "Loading memory 20/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 20",
+            "timeout": 30,
+            "statusMessage": "Loading memory 21/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 21",
+            "timeout": 30,
+            "statusMessage": "Loading memory 22/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 22",
+            "timeout": 30,
+            "statusMessage": "Loading memory 23/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 23",
+            "timeout": 30,
+            "statusMessage": "Loading memory 24/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 0",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 1/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 1",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 2/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 2",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 3/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 3",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 4/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 4",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 5/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 5",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 6/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 6",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 7/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 7",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 8/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 8",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 9/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 9",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 10/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 10",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 11/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 11",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 12/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 12",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 13/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 13",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 14/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 14",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 15/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 15",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 16/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 16",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 17/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 17",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 18/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 18",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 19/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 19",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 20",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 21",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 22",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 23",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 24",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 25",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 26",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 27",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 28",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 29",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 30",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 31",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 32",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 33",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 34",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 35",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 36",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 37",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 38",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/load-wiki.ps1 -Part 39",
+            "timeout": 30,
+            "statusMessage": "Loading wiki 20/20"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 24",
+            "timeout": 30,
+            "statusMessage": "Loading memory 25/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 25",
+            "timeout": 30,
+            "statusMessage": "Loading memory 26/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 26",
+            "timeout": 30,
+            "statusMessage": "Loading memory 27/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 27",
+            "timeout": 30,
+            "statusMessage": "Loading memory 28/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 28",
+            "timeout": 30,
+            "statusMessage": "Loading memory 29/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 29",
+            "timeout": 30,
+            "statusMessage": "Loading memory 30/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 30",
+            "timeout": 30,
+            "statusMessage": "Loading memory 31/32"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File {{CLAUDE_HOME}}/hooks/session-rules.ps1 -Part 31",
+            "timeout": 30,
+            "statusMessage": "Loading memory 32/32"
           }
         ]
       }

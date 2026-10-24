@@ -4,7 +4,6 @@ description: "Report the sample count, the map, and the map's source — earn co
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: cd191791-1c12-4340-a661-8cbdfbe32781
   modified: 2026-08-11T15:16:42.766Z
 ---
 

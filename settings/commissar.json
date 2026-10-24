@@ -1,0 +1,37 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit|Bash|PowerShell|mcp__commissar__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -I {{CLAUDE_HOME}}/hooks/commissar-gate.py",
+            "timeout": 15,
+            "statusMessage": "Commissar gate"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -I {{CLAUDE_HOME}}/commissar/up.py",
+            "timeout": 30,
+            "statusMessage": "Starting the commissar"
+          }
+        ]
+      }
+    ]
+  },
+  "mcpServers": {
+    "commissar": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["-I", "{{CLAUDE_HOME}}/commissar/mcp_server.py"],
+      "env": {}
+    }
+  }
+}

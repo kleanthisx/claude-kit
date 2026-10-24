@@ -222,8 +222,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--session", default="latest", help="session uuid or prefix, or 'latest'")
     ap.add_argument("--project", default="", help="encoded cwd dir under <CLAUDE_HOME>/projects "
-                     "(default: computed from the CURRENT working directory, the same way Claude "
-                     "Code encodes it)")
+                     "(default: inside Claude Code, the dir holding the running session's transcript "
+                     "(CLAUDE_CODE_SESSION_ID); else computed from the CURRENT working directory, "
+                     "the same way Claude Code encodes it)")
     ap.add_argument("--out", default="", help="output .md (default ./session-<date>-<id8>.md)")
     ap.add_argument("--list", action="store_true", help="list available sessions and exit")
     ap.add_argument("--thinking", action="store_true", help="include the assistant's thinking blocks")
@@ -235,7 +236,15 @@ def main():
     if a.full:
         a.max_text = a.max_user = a.max_result = 0
 
-    project = a.project or encode_project_dir(os.getcwd())
+    project = a.project
+    if not project:
+        # Inside Claude Code the running session's transcript decides. After a cd into a subproject
+        # the cwd encodes a DIFFERENT project dir, whose 'latest' is another, older session (2026-10-08).
+        sid = os.environ.get("CLAUDE_CODE_SESSION_ID", "")
+        hits = glob.glob(os.path.join(PROJECTS, "*", sid + ".jsonl")) if sid else []
+        if hits:
+            project = os.path.basename(os.path.dirname(hits[0]))
+    project = project or encode_project_dir(os.getcwd())
     pdir = os.path.join(PROJECTS, project)
     if not os.path.isdir(pdir):
         sys.exit("no such project dir: %s (looked under %s; pass --project to pick a different one, "

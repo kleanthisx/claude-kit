@@ -4,7 +4,6 @@ description: "Six required steps for a real research pass — enumerate first, r
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: cd191791-1c12-4340-a661-8cbdfbe32781
   modified: 2026-08-11T15:16:51.539Z
 ---
 

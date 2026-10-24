@@ -4,7 +4,6 @@ description: Sort the whole list and read it before building any heuristic; freq
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: e13cd0c7-a27e-454e-a43f-39d75c4e7936
   modified: 2026-09-14T16:48:44.949Z
 ---
 
@@ -16,7 +15,7 @@ The user opened the word list in Notepad++, sorted it, and in ~10 minutes found
 structure I had missed across a day of work:
 
 - years (`1969`, `1964`…) that should collapse to decades
-- bra sizes (`34dd`, `36jj`) that mean small/medium/large breasts
+- size codes that mean small/medium/large
 - participant notation (`1m1f` -> `mf`, `3females` -> `fff`)
 - `cuckhold`, a 499-use misspelling immune to my corrector
 - run-together compounds (`chastitybelt`, `daddaughter`, `brotherandsister`)

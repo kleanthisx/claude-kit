@@ -4,7 +4,6 @@ description: "On research work, a shallow-wide CITED pass is a valid deliverable
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: 3a873254-63ff-47c5-95ec-1222a141cd15
   modified: 2026-08-15T08:37:34.734Z
 ---
 

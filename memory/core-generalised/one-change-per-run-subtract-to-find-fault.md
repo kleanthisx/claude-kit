@@ -4,7 +4,6 @@ description: "User's debugging principles — start basic, change ONE thing per 
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: c70b1007-9573-41fe-8972-5240b6dc2ff7
   modified: 2026-09-11T19:19:46.692Z
 ---
 

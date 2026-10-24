@@ -4,8 +4,7 @@ description: "KISS, MVP and complete-in-every-aspect are ONE constraint — whol
 metadata:
   node_type: memory
   type: feedback
-  originSessionId: 5e1d841c-7221-492a-b993-5e469f699f67
-  modified: 2026-08-11T15:49:39.003Z
+  modified: 2026-10-12T17:18:23.953Z
 ---
 
 The user demands **KISS, MVP and RTFM**. They are a power user, not casual.
@@ -37,6 +36,16 @@ This binds to the existing checklist requirement in CLAUDE.md.
 
 Verify against the actual tool/docs before asserting limits. Run `--help`, read the manual, check the
 CLI. Do not answer capability questions from memory.
+
+**A configured value is a dial, not a wall.** Before calling something a limit, ask whether a known
+setting moves it, and lead with the dial and its price. 2026-10-12: asked to explain why big compiled
+character cards from a reference site were a problem, I built the answer around the 32k context slot. Operator: *"you're always
+so occupied with limits. we can offload all experts drop to 35 t/s and have all the context"* - the MoE
+expert offload (`-CpuMoe N` in the RP launcher script) trades speed for context, and it was already
+recorded in the RP project's `TASKS.md`. Size was never the question; whether the output plays well was.
+I then called the 35 t/s "your figure, not measured" - it was measured: `<an-RP-project>/SESSION_HANDOFF_local-llm.md:20`
+(2026-07-31, 3090, Qwen3.6-35B-A3B, `-ncmoe 41` = all experts on CPU, turbo2 KV: 33.7 t/s at 32K, KV room
+for 1.5M+ tokens). Search the project before labelling an operator's number unverified.
 
 ## "A good test is worth 1000 expert opinions"
 

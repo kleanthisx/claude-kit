@@ -6,6 +6,42 @@ one-off measurement), OPEN ? (decided provisionally, not yet closed out). Edited
 when status genuinely changes; old reasoning stays visible. Full reasoning for each is in
 [ACTION-LOG.md](ACTION-LOG.md); this file is the index, not the argument.
 
+- **github-is-a-transfer-layer** — STANDING ⚖ — local `main` keeps full history and is never
+  pushed; curated trees go out as commits on the orphan `transfer` branch (`git commit-tree
+  main^{tree} -p transfer`) pushed to `origin/main`. Operator, 2026-09-17: "the local repo is the one
+  we use. that's ok to have history ... we use github as transfer layer". [log 2026-09-17]
+- **ship-principles-and-templates-not-specifics** — STANDING ⚖ — project/machine-specific files ship
+  as generalised documents or templates that Claude at the target site adapts; wikis ship as design
+  principles only, never as an example wiki. [log 2026-09-17]
+- **core-sensitive-is-home-only** — STANDING ⚖ — `memory/core-sensitive/` and
+  `memory/personal/` (incl. `inject-exclude.home.txt`) are git-ignored; the shipped
+  `inject-exclude.txt` names no files. The identifier denylist is never committed. [log 2026-09-17]
+- **public-cc0** — STANDING ⚖ — repo is public under CC0 1.0. Operator: "you and i have benefited
+  greatly from other people's work so make it open. as open as it gets." [log 2026-09-17]
+- **rewrite-local-history-to-repush** — DISCARDED ✗ — squashing local main to one commit was the
+  wrong layer; the leak was on the remote, not in the working repo. [log 2026-09-17]
+
+- **commissar-is-an-optional-layer** — STANDING ⚖ — THE COMMISSAR (reviewer on a second model via the
+  Codex CLI) ships in the kit but installs only with `install.ps1 -WithCommissar`: it needs Python, Node, a
+  logged-in Codex CLI and bills that account, so a default install must not depend on it. Her code derives
+  every path from where it is installed; `config.json`, `state.json`, `doctrine.md` and the log are hers
+  once installed and are never overwritten or uninstalled. [log 2026-10-24]
+- **research-ships-as-our-summary-with-references** — STANDING ⚖ — third-party sources we fetched (the
+  Ekbasis paper, PDF, repo listing, hook code under `docs/research/ekbasis-2026-10-10/`) stay in local main
+  and out of every transfer; what ships is our own `SUMMARY.md` (detailed, every claim with a line locator)
+  plus `ROWS.md` and `SOURCES.md`, with the academic reference (author, title, DOI, URLs, licence) so the reader
+  fetches the source themselves. Operator, 2026-10-24: "put ekbasis in as a summary. a detailed summary. it is
+  what we know. not the source. add reference links ... we give academic reference". The transfer is built
+  from a filtered tree, not `main^{tree}`. [log 2026-10-24]
+- **kit-memory-is-method-not-preference** — STANDING ⚖ — operator preferences (editor, launch flags) and one project's
+  operational practice do not ship even when typed `feedback`: on a stranger's machine they are wrong orders, and a
+  `--dangerously-skip-permissions` default is a hazard. Explicit wording from the adult image bench is rewritten to
+  anatomy/body terms: the lesson ships, the content does not. Found by the 2026-10-24 adversarial review. [log 2026-10-24]
+- **memory-tier-syncs-from-live-by-type** — STANDING ⚖ — files of frontmatter `type: feedback` are method
+  and ship (verbatim to `core/` when identifier-free, else generalised); `project`, `user`, `reference`
+  stay home. The `scrape-gently-*` file was renamed in the kit because its name was an identifier.
+  [log 2026-10-24]
+
 - **inject-the-files-not-a-summary** — PROVEN ✓ — `session-rules.ps1` (SessionStart + PostCompact
   hook) now injects every method-memory file in full, not the RULES.md summary. Measured
   2026-09-16: 45 files, 106,014 chars, ~26.5k tokens per injection, pure-ASCII JSON,

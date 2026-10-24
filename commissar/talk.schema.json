@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "properties": {
+    "answer": {"type": "string", "description": "your answer to the operator, in your own words"},
+    "doctrine_update": {
+      "type": "object",
+      "properties": {
+        "action": {"type": "string", "enum": ["none", "append", "replace"]},
+        "text": {"type": "string", "description": "append: the rule or note to add; replace: your whole new copy; none: empty"},
+        "reason": {"type": "string", "description": "why, in one line; empty for none"}
+      },
+      "required": ["action", "text", "reason"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["answer", "doctrine_update"],
+  "additionalProperties": false
+}

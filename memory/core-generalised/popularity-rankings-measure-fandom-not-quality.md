@@ -4,7 +4,6 @@ description: "before using any community rating/vote ranking as a quality axis, 
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: e13cd0c7-a27e-454e-a43f-39d75c4e7936
   modified: 2026-09-13T10:57:05.261Z
 ---
 
@@ -27,11 +26,11 @@ axis. (2) Prefer signals that agree across two independently-constructed ranking
 `char_len` 4.2x and 2.4x over corpus), which is what made *length* credible where rating was not.
 (3) State the sampling limit out loud: holding only the top N with no random or bottom sample shows
 "the top ones have property X", never "X predicts rank" — that needs a control group.
-(4) This applies to any vote-ranked source, including Civitai/Reddit model rankings cited in
+(4) This applies to any vote-ranked source, including model-hub/Reddit model rankings cited in
 `research/a model-survey folder/` — those votes were never checked against a base rate either.
 
 Related: [[report-verifiable-only]], [[coverage-is-sampling-not-headcount]],
-[[provenance-or-nothing]], a related note.
+[[provenance-or-nothing]], [[uncensored-is-a-claim-read-the-card]].
 
 > *Generalised for portability: the incident behind this rule is described without naming the
 > project. The lesson, the numbers and the user's words are unchanged.*

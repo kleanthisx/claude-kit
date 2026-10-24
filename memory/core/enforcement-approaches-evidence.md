@@ -4,7 +4,6 @@ description: Sourced findings on what actually makes an LLM obey rules — deter
 metadata: 
   node_type: memory
   type: reference
-  originSessionId: cd191791-1c12-4340-a661-8cbdfbe32781
   modified: 2026-08-11T15:27:09.278Z
 ---
 

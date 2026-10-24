@@ -26,8 +26,9 @@ ls docs/wiki/entities 2>/dev/null && echo V2 || echo V1
 1. **Regenerate first.** `python docs/wiki/generate.py` — the four surfaces are **generated and
    gitignored**, so on a fresh clone they do not exist at all until this runs. Report its entity
    count, errors and warnings; errors mean the wiki is broken, not that you should proceed.
-2. **Verify delivery, not just installation.** `OVERVIEW.md`, `DISCARDED.md`, `NAMES.md` and
-   `doctrine/` count as loaded only if their content is actually in context, from one of:
+2. **Verify delivery, not just installation.** `SYSTEM.md` (in a wiki without one: `OVERVIEW.md` and
+   `NAMES.md`), `DISCARDED.md` and `doctrine/` count as loaded only if their content is actually in
+   context, from one of:
    - `<CLAUDE_HOME>/hooks/load-wiki.ps1`, at SessionStart and after compaction. Depending on the
      installed version it injects one block, or numbered `WIKI PART n/N SHA256 ...` parts: then
      count all `N` parts and confirm their SHA256 labels agree.
@@ -38,13 +39,14 @@ ls docs/wiki/entities 2>/dev/null && echo V2 || echo V1
    offset until the end. A grep hit, directory listing, first lines, or a `Read` request without its
    full result is not a read. Say which path was actually taken. `DECISIONS.md` is **on demand**
    (operator, 2026-10-07): the one-block `load-wiki.ps1` injects it; otherwise do not read it at
-   orientation; grep it for a decision by name when one is needed.
+   orientation; grep it for a decision by name when one is needed. Where `SYSTEM.md` exists,
+   `OVERVIEW.md` and `NAMES.md` are on demand too (2026-10-11): read them when work starts on a part.
 3. **Read `docs/wiki/TASKS.md`** — it is the next-session pointer in v2. `NEXT.md` is a redirect stub.
 4. **Do not read `docs/history/`.** Ever, at orientation. It is the frozen record, cited by path from
    entity bodies when a specific claim needs checking.
 
-Then resolve the user's words against `NAMES.md` before doing anything: a row marked **AMBIGUOUS
-means ask**, not guess.
+Then resolve the user's words to one entity before doing anything: `SYSTEM.md` names the parts; grep
+`NAMES.md` for an alias it does not name. A row marked **AMBIGUOUS means ask**, not guess.
 
 **Otherwise → v1.** Read the **first that exists**, in this priority:
 1. `docs/wiki/decisions.md` **+** `docs/wiki/index.md`  ← the standard (see the hub's `WIKI-STANDARD.md` if this workspace has one)

@@ -4,7 +4,6 @@ description: "State the worst-case count of user-facing interruptions before any
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: cd191791-1c12-4340-a661-8cbdfbe32781
   modified: 2026-09-02T18:56:57.323Z
 ---
 

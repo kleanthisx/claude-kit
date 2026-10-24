@@ -20,11 +20,15 @@ BOOTSTRAP.md          read this first
 doctrine/             the working agreement (CLAUDE.md, RULES.md, RATIONALE.md) -- installed
 memory/               tiered method rules + evidence -- installed (tier depends on -Profile)
 hooks/                the enforcement layer (PowerShell, PreToolUse/PostToolUse/Stop/SessionStart/...) -- installed
-skills/               enter / judge / wrap SKILL.md -- installed
+skills/               enter / wrap / judge / fleet / unattended SKILL.md -- installed; commissar with -WithCommissar
+commissar/            THE COMMISSAR: a reviewer on a second model (OpenAI via the Codex CLI) approves plans;
+                      hooks/commissar-gate.py enforces them -- installed only with -WithCommissar
+conclave/             Conclave: a two-model council (Claude executes, Codex governs and may veto) over one
+                      SQLite db, as an MCP server plus an optional hook -- installed only with -WithConclave
 agents/               scribe.md -- installed, {{CLAUDE_HOME}} substituted
 tools/                render_session.py, statusline-usage.ps1, tally-usage.py -- installed
 settings/             hooks.json + permissions.json fragments merged into settings.json by install.ps1
-tests/                test-hooks.ps1, test-entity-read.ps1, test-delete-coverage.py, test-judge-dread.ps1
+tests/                context, installer, read-gate, deletion, hook, and paid Judge Dread suites
 templates/            REFERENCE ONLY -- never installed; see BOOTSTRAP.md "Adapting at a new site"
 wiki-v1/, wiki-v2/    never installed; two wiki designs. wiki-v2/ also holds the primer, generator and
                       coverage check that a project copies into docs/wiki/
@@ -50,6 +54,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File install.ps1 `
     -MemoryDir "$env:USERPROFILE\.claude\projects\<encoded-dir>\memory"
 
 powershell -NoProfile -ExecutionPolicy Bypass -File install.ps1 -Uninstall
+
+# optional: the commissar (needs python, node, `npm install -g @openai/codex`, `codex login`)
+powershell -NoProfile -ExecutionPolicy Bypass -File install.ps1 -Profile work -MemoryDir <as above> -WithCommissar
+
+# optional: conclave (python 3.11+; the installer prints the Codex-side registration line to run yourself)
+powershell -NoProfile -ExecutionPolicy Bypass -File install.ps1 -Profile work -MemoryDir <as above> `
+    -WithConclave -Council <name> [-ConclaveProjectRoot <path>]
 ```
 
 `-MemoryDir` has no safe default: memory is **project-scoped**, living under
@@ -63,11 +74,16 @@ value, the installer skips memory and says so rather than guessing.
 | `settings.json` | **Merged, never replaced.** Existing hooks, permissions, `statusLine` and preferences are kept; only missing entries are added (a `statusLine` is added only if the target has none at all). Verified by installing over a foreign config: their Stop hook survived alongside Judge Dread, `model`/`defaultMode`/`statusLine` were left exactly as found. |
 | `permissions.defaultMode` | **Never written.** A `dontAsk` source machine pushing that onto a work laptop is the riskiest line in the package, so the installer refuses to touch it. |
 | `~\CLAUDE.md` | If one exists it is **left alone** and you are told to merge by hand. An installer should not overwrite a working agreement. |
+| `MEMORY.md` | An existing local index is **left alone** and its coverage is reported, not silently repaired. On a fresh install, the index is generated from files actually installed by that profile. `MEMORY.personal.md` is source material for home index entries, not installed as a second index. |
+| `inject-exclude.txt` | An existing local exclusion list is preserved. If the profile source differs, the installer reports a conflict for manual review; it never silently changes what gets injected into sessions. |
+| `hooks\*.log` | Runtime logs are never copied from the kit or removed on uninstall. Only hook code and the two documented hook support files are installed. |
 | Backups | Written **lazily** — only when a run actually changes something, so a no-op re-run cannot leave a backup of the already-merged state. |
 | `-Uninstall` | Restores the **oldest** backup (the true pre-kit state) and removes the copied hooks/agents/tools. Memory and doctrine are left: they are content, not wiring. |
 
-Idempotent: a second run reports every file as `same:`, `0 to add`, `+0 new` permissions,
-`statusLine : already set`, and writes nothing.
+The **settings merge** is idempotent: a second run adds no duplicate hooks or permissions and
+creates no new settings backup. Kit-owned skills, fixtures, doctrine, and memory content can still
+be recopied; review changes before an update. Local `MEMORY.md`, `inject-exclude.txt`, and hook logs
+are preserved as described above.
 
 ## Memory tiers
 
@@ -75,35 +91,44 @@ Counts below are what is currently on disk in this repo — recompute after any 
 these numbers (`install.ps1`'s own messages compute them at run time rather than hardcode them, for
 the same reason).
 
-- **`core/`** (17 files) — method with no project in the evidence. Ships on every profile.
-- **`core-generalised/`** (43 files) — the rules whose evidence named a project, rewritten so the
+- **`core/`** (19 files) — method with no project in the evidence. Ships on every profile.
+- **`core-generalised/`** (64 files) — the rules whose evidence named a project, rewritten so the
   project is *described* rather than named, **plus** the `gem-*.md` generic lessons that never had a
   project-named counterpart. Numbers, quotes and lessons unchanged from their originals; each
   generalised file carries a footer saying so. Ships on every profile.
 - **`core-sensitive/`** (30 files) — the named originals of the generalised rules above. **Not in a
   fresh clone** — it is git-ignored and lives only on the machine it was written on.
-- **`personal/`** (21 files) — project state and machine specifics, plus the home-only
-  `inject-exclude.home.txt`. Also git-ignored, also absent from a fresh clone.
+- **`personal/`** (20 content files plus `MEMORY.personal.md`) — project state and machine
+  specifics, plus the home-only `inject-exclude.home.txt`. The personal index is source material,
+  not an installed file. This tier is git-ignored and absent from a fresh clone.
 
 `-Profile work` installs `core + core-generalised` = **60 files, nothing withheld, no project named
-anywhere**. `-Profile home` installs `core + core-sensitive + personal` = **68 files**, but only on
-the machine that has those git-ignored tiers — a clone made elsewhere gets `core` only, and the
+anywhere**. `-Profile home` installs `core + core-sensitive + personal` = **67 content files plus
+one `MEMORY.md` index** (generated if absent, preserved if present), but only on the machine that has those git-ignored tiers — a
+clone made elsewhere gets `core` only, and the
 installer says so per tier rather than silently installing less than the profile implies.
 
 Everything published here is portable method. Project state never leaves the machine it belongs to.
 
 ## The directives are injected in full, not summarised
 
-`session-rules.ps1` (`SessionStart` + `PostCompact`) injects **every method file in the installed
-memory tier, in full**, plus `doctrine/RULES.md` (3.9 KB): currently **~141 KB / ~35k tokens** for
-the work profile (60 files), **~193 KB / ~48k tokens** for the home profile (68 files, home machine only).
+`session-rules.ps1` runs as 20 numbered `SessionStart` hooks. Together they emit **every selected
+method file in full**, plus `doctrine/RULES.md` (3.9 KB). The work tier contains 60 files (~141 KB
+on disk); the home tier contains 67 installed content files (~190 KB on disk). `inject-exclude.txt`
+removes inventory files from the always-loaded selection, so those disk sizes are **not** injection
+sizes. One pre-fix home snapshot measured ~131,000 characters; the current amount varies with local
+memory. Each part stays below Claude Code's 10,000-character
+per-string cap. The former single large hook was persisted to a file and replaced in model context
+by a path and 2,000-character preview; it did **not** deliver the full directives. This was
+observed in a live session transcript. `SessionStart` also fires after compaction (`source=compact`);
+`PostCompact` is not used for context delivery.
 
 It used to inject `RULES.md` alone, a 3.6 KB summary. That was the bug: with a summary in context and
 `MEMORY.md`'s one-line index auto-loaded, a session has the *appearance* of the directives and none of
 their evidence, and reciting from that appearance is indistinguishable from reciting from the files. A
 summary cannot prove a read.
 
-The injection opens with a short precedence header (829 chars, the only added text) stating that these
+The injection opens with a precedence header stating that these
 standing instructions outrank the harness's default tool-choice steering — scoped to method, and
 explicitly NOT overriding safety rules or a live instruction in the user's current message. A blanket
 override was rejected on the evidence in `memory/core/enforcement-approaches-evidence.md`: contradictory
@@ -113,9 +138,10 @@ rule sets produce fabrication rather than refusal.
 profile — the installer picks the right one automatically), one basename per line, `#` comments
 allowed. Tune the cost there; do not tune it by going back to a summary.
 
-`load-wiki.ps1` (also `SessionStart` + `PostCompact`, right after `session-rules.ps1`) additionally
-injects a v2 project's generated wiki surfaces when one exists — measured ~74 KB / ~19k tokens on one
-project (`hooks/README.md`); no-op everywhere else.
+`load-wiki.ps1` runs in parallel as 16 numbered `SessionStart` hooks and emits a v2 project's
+generated wiki surfaces plus doctrine. The current measured project is ~112 KB, requiring 13 parts.
+If started above the project wiki, it names candidate projects but does not guess which wiki to load.
+`tests/test-context-delivery.ps1` checks every part, reconstruction, Unicode, overflow, and wiring.
 
 ## Before you trust it on a new machine
 
@@ -124,11 +150,11 @@ project (`hooks/README.md`); no-op everywhere else.
    warns.
 2. **Judge Dread costs one `claude -p` per turn.** That is the deliberate trade: it catches unbacked
    claims and substituted methods. `/judge quiet` or `/judge off` if a given machine shouldn't pay it.
-3. **Run the suites.** `tests\test-hooks.ps1` (86 PASS / 0 FAIL / 1 SKIP as of this writing — the
-   SKIP is `verify-done.ps1`'s superseded cases, opt in with `-IncludeSuperseded`).
-   `tests\test-entity-read.ps1` (40 cases, 0 FAIL). `python tests\test-delete-coverage.py` (42 cases,
-   `ALL GREEN`). `tests\test-judge-dread.ps1` needs the CLI and makes live model calls — not run as
-   part of finishing this repo.
+3. **Run the non-model suites.** `tests\test-install-profile.ps1` checks both profiles and
+   installer preservation in disposable homes; `tests\test-context-delivery.ps1` checks complete
+   numbered context; `tests\test-entity-read.ps1`, `tests\test-hooks.ps1`, and
+   `python tests\test-delete-coverage.py` check the guards. `tests\test-judge-dread.ps1` needs the
+   CLI and makes 14 live model calls; it has not been run as part of this repair.
 4. **`verify-done.ps1` is superseded** by Judge Dread and is shipped as a record only. Wiring both
    would audit the same Stop event twice and pay two model calls per turn.
 5. **`settings/permissions.json` is a starting point, not a finished list.** Every entry naming a
@@ -138,13 +164,10 @@ project (`hooks/README.md`); no-op everywhere else.
 
 ## Known gaps, carried over honestly
 
-`guard-destructive.ps1` covers *recursive* deletion typed at the prompt. It does **not** catch a
-forced delete of named files (`rm -f a.json b.log`), and it cannot see deletion inside a script file —
-it only ever receives `tool_input.command`, so `python run_x.py` is invisible while an inline
-`os.remove(p)` is caught. Both were measured, both hit live. `test-delete-coverage.py` (the matrix, beside the suite) was RUN: **ALL GREEN, 42 cases, exit 0**. It does
-NOT omit these two shapes — it asserts them as allowed: the cases `plain-rm-file` and `py-script`
-both carry `expected=PASS`. So neither finding above is an oversight; both are encoded current design, and
-"fixing" them means flipping two green assertions. That is a call for the user, not a patch to slip in.
+`guard-destructive.ps1` now catches named-file deletes and scans directly launched scripts for
+destructive calls; `plain-rm-file` expects ASK in the deletion matrix. Its known limits are a
+script launched by a launched script (third level), imported modules, and script files over 512 KB.
+See `BOOTSTRAP.md` §e and the executable test matrix for current behavior.
 
 `guard-agent-fleet.ps1`'s spawn counter is per-session, so a spawn burst split across two sessions is
 not aggregated. See `hooks/README.md` for the rest of the per-hook gaps.

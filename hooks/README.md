@@ -5,7 +5,7 @@ original hooks live-verified, including the Stop hook blocking the assistant's o
 ## The one-paragraph mental model
 Prose rules (CLAUDE.md) are advice the model can ignore — transcript analysis proved it ignores them. This layer moves the critical rules into mechanisms that run **outside the model's discretion**: hooks fire on every matching tool call no matter what the model "decides." CLAUDE.md still carries the Q:/GO protocol (advice), and the hooks are the enforcement floor under it.
 
-## The six hooks (wired in `~\.claude\settings.json` → `"hooks"`)
+## The hooks (wired in `~\.claude\settings.json` → `"hooks"`; `verify-done.ps1` below is superseded and NOT wired)
 
 ### 1. `guard-destructive.ps1` — PreToolUse on `Bash|PowerShell`
 Regex-scans every shell command. Destructive patterns (rm -rf variants any flag order, `Remove-Item/-ri/-rd/-erase/-del` with Recurse+Force, piped `| Remove-Item`, `[System.IO.Directory]::Delete`, `rmdir /s`, `del /s|/q`, `git push --force` (but **not** `--force-with-lease`), `git reset --hard`, `git clean -f`, bare `git stash` (but not pop/apply/list/show), mkfs/Format-Volume/Clear-Disk) → **interactive ask prompt** (confirmed working even under `defaultMode: dontAsk`).
@@ -23,7 +23,7 @@ If **`PLAN.md` exists in the project cwd** and lacks the line `APPROVED: GO` →
 After every edit, if the project has **`.claude\posttest.ps1`**, it runs; non-zero exit **wakes the model with the failure output** (exit 2), catching A-breaks-B before more is built on top.
 - **Per-project opt-in.** Inert by default in every project until you copy `posttest.template.ps1` to `<project>\.claude\posttest.ps1` and put the right test command in it (e.g. `npm test` for a JS project). Keep it FAST (seconds) — it runs on every edit.
 
-### 4. `verify-done.ps1` — Stop hook (every turn end)
+### 4. `verify-done.ps1` — Stop hook (every turn end) — SUPERSEDED by `judge-dread.ps1`, not wired
 Reads the final turn from the transcript. If the last assistant message contains completion-claim language (done/complete/verified/fixed/working/finished/ready/passes/…) → sends the whole turn (incl. real tool outputs) to a **Haiku judge** (`claude -p --model claude-haiku-4-5 --settings judge-settings.json`). Judge says UNBACKED → turn end is **blocked** with the reason; the model must produce evidence. One block max per turn (`stop_hook_active` guard).
 - Recap leniency: status summaries explicitly attributed to earlier-verified work count as BACKED; only NEW this-turn claims need in-turn evidence.
 - Discussion leniency (added after a live false positive): text that merely discusses/quotes done-words without claiming new this-turn work counts as BACKED; a claim that the assistant itself fixed/verified something with zero tool activity in the turn stays UNBACKED (the original bluff case still blocks).
@@ -52,6 +52,42 @@ Bounds the **user-facing blast radius** of subagent spawning. Added after a doze
 - **Escape hatch (same idiom as LAUNCH.md):** a line `APPROVED: GO` in `<cwd>\FLEET.md` pre-approves a batch and the gate goes silent. Removing the line or the file re-arms it. (This is a per-batch approval record, not a template — there is no generic content to fill in beyond "state what you're approving and why.")
 - **To tune:** `$THRESHOLD` / `$WINDOW_MIN` at the top of the script. **To disable:** remove the Agent entry from settings hooks.
 - **Known gap (accepted):** the counter is per-session, so a spawn burst split across two sessions is not aggregated.
+
+### 7. `usage-gate.ps1` — PreToolUse on every state-changing or paid tool
+Pauses work instead of letting a run die at the usage cap. Added 2026-10-02 for unattended batches: when the
+5-hour or 7-day meter reaches `CLAUDE_USAGE_PAUSE_PCT` (default **98**), every gated tool call sleeps until the
+reset time plus 60 s, then resumes.
+- Reads `~/.claude/usage-state.json` (`pct` + `resets_at` per window), written by `tools/statusline-usage.ps1`
+  from the server's rate-limit headers; no file → the gate is silent. Override the path with `CLAUDE_USAGE_STATE`.
+- Hook `timeout` is **19000 s** so the sleep is not cut short. Log: `~/.claude/hooks/usage-gate.log`
+  (`pause <window>, sleeping Ns` / `resume`).
+- `Read`, `Grep`, `Glob` are not gated: orientation keeps working while paid work waits.
+- **Not verified:** whether Claude Code honours a 19000 s hook timeout in every version; measured once on the
+  source machine.
+- **To disable:** remove the usage-gate entry from settings hooks, or set `CLAUDE_USAGE_PAUSE_PCT=101`.
+
+### 8. `keep-going.ps1` — Stop, every turn end (armed only in unattended mode)
+Stops the "4-minute stop": an unattended session ending its turn with a menu ("should I start?") while the
+operator is away.
+- Armed by `/unattended on`, which writes `~/.claude/unattended.json`; `/unattended off` removes it.
+  **No flag file → the hook does nothing.**
+- While armed, a turn may end only if the final message contains a line `STOP-CASE: <reason>` (complete with
+  evidence, irreversible, outward-facing, spend bound, or an operator-only decision parked in
+  `PENDING_APPROVAL.md`). Otherwise the Stop is blocked with the reason.
+- Cap **40 blocks per arming** (`blocks` counter in the flag file), so a stuck session cannot loop forever.
+- **To disable:** `/unattended off`, or delete the flag file.
+
+### 9. `commissar-gate.py` — PreToolUse on `Edit|Write|NotebookEdit|Bash|PowerShell|mcp__commissar__.*` (optional layer)
+Installed only with `install.ps1 -WithCommissar`. The deterministic half of THE COMMISSAR (`commissar/README.md`):
+a reviewer on a second model approves the agent's *plan*; this hook lets a state-changing tool call through only
+if an approved plan covers it. Python, about 10 ms, no model call of its own.
+- Reads the session's plan state from the service on `127.0.0.1:8791`; `config.json` `mode`: `log` records what
+  it would have blocked and allows, `enforce` blocks and **fails closed** when the service is down.
+- Always allowed: read-only commands, scratch paths under `%TEMP%\claude`, and her own two operator commands
+  (`up.py`, `talk.py`), derived from the installed path.
+- Record: the earlier per-action asking check (`pre-action-log.py`, kept as code) would have asked on 85% of
+  actions; a plan-level review plus a code gate is the answer to that measurement.
+- **To disable:** `/commissar off` (log mode), or uninstall; the hook does nothing useful without the service.
 
 ## Measured coverage gaps in `guard-destructive.ps1` — FOUND, CLOSED 2026-09-16
 
@@ -102,7 +138,7 @@ carry `expected=PASS`. So neither finding above is an oversight; both are encode
 
 ## Permission rules (settings.json → `"permissions"`)
 - **ask** (10 rules): command-initial destructive prefixes (`Remove-Item`, `rm -rf/-r/-fr`, `rmdir`, `git push --force/-f`, `git reset --hard`, `git stash`, `git clean`) prompt even in dontAsk. Note: `Remove-Item` was MOVED here from the allow list — do not re-add it to allow.
-- **deny** (7 rules): literal catastrophic forms (`rm -rf /`, `rm -rf ~`, `rm -rf C:*`, `Remove-Item -Recurse -Force C:\`). Tripwire only — prefix-match, not a wall. Deny is NOT interactively approvable; keep this list to never-even-with-approval cases.
+- **deny** (9 rules): literal catastrophic forms (`rm -rf /`, `rm -rf ~`, `rm -rf C:*`, `Remove-Item -Recurse -Force C:\`). Tripwire only — prefix-match, not a wall. Deny is NOT interactively approvable; keep this list to never-even-with-approval cases.
 - Rule syntax is prefix matching: `"Bash(cmd:*)"`. Embedded/mid-pipeline commands are the hook's job, not rules.
 
 ## CLAUDE.md pieces (`$env:USERPROFILE\CLAUDE.md`)
@@ -110,7 +146,7 @@ carry `expected=PASS`. So neither finding above is an oversight; both are encode
 - **Anti-deviation gate ceiling:** max 2 review rounds after the first; still failing → surface findings and ask, never loop on.
 
 ## Testing after any change
-- `powershell -File ~\.claude\hooks\test-hooks.ps1` — pipe-tests for the four guards (incl. launch-gate cases, and fleet-gate cases: threshold 1-3 silent / 4th-5th ask, prompt-read blast estimate, FLEET.md armed+disarmed, fresh-session reset) + posttest + the delete-coverage matrix + Stop-hook cases (synthetic fixtures, no side effects outside temp). The Stop-hook cases: no-claim prefilter skip, bluff-with-no-tools → block, evidence-backed → pass, chat-only mention of done-words → pass, PATH-stubbed malformed judge → fail-open warning. Some of them use one real Haiku call each.
+- `powershell -File <kit>\tests\test-hooks.ps1` (from the kit checkout; not installed) — pipe-tests for the four guards (incl. launch-gate cases, and fleet-gate cases: threshold 1-3 silent / 4th-5th ask, prompt-read blast estimate, FLEET.md armed+disarmed, fresh-session reset) + posttest + the delete-coverage matrix + Stop-hook cases (synthetic fixtures, no side effects outside temp). The Stop-hook cases: no-claim prefilter skip, bluff-with-no-tools → block, evidence-backed → pass, chat-only mention of done-words → pass, PATH-stubbed malformed judge → fail-open warning. Some of them use one real Haiku call each.
 - Live: create a dummy dir and `Remove-Item -Recurse -Force` it — expect the prompt. Create an unapproved `PLAN.md` and try an edit — expect a deny.
 
 ## Kill switches
@@ -157,22 +193,26 @@ good intentions do not fix that; removing the decision from the model's discreti
 
 ## load-wiki.ps1 — the always-loaded layer
 
-`SessionStart` **and** `PostCompact`, after `session-rules.ps1`.
+`SessionStart`, as 16 parallel numbered parts. It runs again after compaction with `source=compact`.
 
 Injects a project's generated wiki surfaces — `OVERVIEW.md` (what exists), `DISCARDED.md` (what is
 already a dead end), `NAMES.md` (aliases to canonical; AMBIGUOUS means ask), `DECISIONS.md` (one line
 per decision) and everything in `doctrine/` — as `additionalContext`, with a header saying how to use
-them in order. **Regenerates first** (`python docs/wiki/generate.py`), so what is injected is never
-stale relative to the entity files, and reports the lint count inline.
+them in order. When generated surfaces are older than their entity/ledger inputs, a cross-process
+lock lets one part regenerate them before all parts read them. Each part is below Claude Code's
+10,000-character cap and carries its position and a snapshot hash. Each part also runs the read-only
+wiki lint; an error fails delivery, while the shared warning count is reported in the header.
 
-**`PostCompact` is the load-bearing half.** Compaction has been measured to take rule violation from
-near-zero to 30-59%, and re-injection after compaction is the documented fix. Hook output also
-arrives as a clean system-reminder without the "ignore if irrelevant" framing that licenses
-skipping an injected file.
+The old single 74–112 KB hook did not inject in full: Claude Code replaced it with a file path and
+2,000-character preview. `PostCompact` is not used for model context; `SessionStart` on compaction
+is the delivery event. If the session begins above a v2 project, part 1 warns instead of guessing
+which project's wiki to load.
 
-Fires only in a project that has `docs/wiki/entities/`; silent everywhere else. Emits pure ASCII
+Fires in a project that has `docs/wiki/entities/`; otherwise warns only if immediate children have
+v2 wikis. Emits pure ASCII
 (unicode-escaped) for the same reason `session-rules.ps1` does.
 
 - Disarm: `$env:WIKI_LOAD = 'off'`
-- Cost, one v2 project, measured: **74 KB / ~19k tokens** per injection. It pairs with
+- Cost, one v2 project, measured 2026-09-20: **112 KB / ~28k tokens** per injection. It pairs with
   `guard-entity-read.ps1`: this one makes the index present, that one makes the detail non-optional.
+- Tests: `powershell -NoProfile -ExecutionPolicy Bypass -File tests/test-context-delivery.ps1`.

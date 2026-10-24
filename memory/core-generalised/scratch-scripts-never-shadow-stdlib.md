@@ -4,7 +4,6 @@ description: "Write throwaway Python into the session scratchpad, never %TEMP%, 
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: e13cd0c7-a27e-454e-a43f-39d75c4e7936
   modified: 2026-09-14T11:54:30.956Z
 ---
 

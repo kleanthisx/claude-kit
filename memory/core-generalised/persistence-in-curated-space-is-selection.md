@@ -4,7 +4,6 @@ description: "In a place showing active upkeep, a surviving out-of-place item is
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: 301c5577-6f4d-4f7e-b4dd-d5f77ab95a80
   modified: 2026-08-13T19:37:26.053Z
 ---
 

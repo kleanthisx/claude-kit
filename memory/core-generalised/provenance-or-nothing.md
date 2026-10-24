@@ -4,7 +4,6 @@ description: Ship data only when it carries provenance — source it from a cita
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: cd191791-1c12-4340-a661-8cbdfbe32781
   modified: 2026-08-11T15:16:20.166Z
 ---
 

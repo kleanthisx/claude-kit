@@ -14,10 +14,29 @@
 # Everything here is SELF-CONTAINED: the fixtures live in .\fixtures and the hook
 # is found relative to this file, so the suite runs wherever the bundle is put.
 $ErrorActionPreference = 'Stop'
-$hook = Join-Path $PSScriptRoot 'judge-dread.ps1'
-$FIX = Join-Path $PSScriptRoot 'fixtures'
-$tmp = Join-Path $env:TEMP 'shadowtest'
-New-Item -ItemType Directory -Force -Path $tmp | Out-Null
+$hook = Join-Path $PSScriptRoot '..\hooks\judge-dread.ps1'
+$hookDir = Split-Path $hook -Parent
+$fixtureSource = Join-Path $PSScriptRoot 'fixtures'
+$needed = @($hook,
+            (Join-Path $hookDir 'judge-dread-worker.ps1'),
+            (Join-Path $hookDir 'judge-settings.json'),
+            $fixtureSource)
+$missing = @($needed | Where-Object { -not (Test-Path $_) })
+if ($missing.Count) {
+    throw "Judge Dread assets missing; no paid calls started: $($missing -join ', ')"
+}
+if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
+    throw 'claude CLI is not on PATH; no paid calls started.'
+}
+$statePath = Join-Path $hookDir 'judge-state.json'
+if (Test-Path $statePath) {
+    $state = Get-Content $statePath -Raw | ConvertFrom-Json
+    if ($state.mode -eq 'off') { throw 'Judge Dread is off in this kit; turn it on before the full suite.' }
+}
+$runTag = [guid]::NewGuid().ToString('N').Substring(0, 12)
+$tmp = Join-Path $env:TEMP "shadowtest-$runTag"
+$FIX = Join-Path $tmp 'fixtures'
+Copy-Item -LiteralPath $fixtureSource -Destination $FIX -Recurse -Force
 
 function New-Transcript {
     param($name, $human, $calls, $reply)
@@ -48,9 +67,8 @@ $empty = Join-Path $tmp 'empty.jsonl'
 Set-Content -Path $empty -Encoding utf8 -Value (@{ type = 'user'; message = @{ content = 'nothing to audit' } } | ConvertTo-Json -Depth 4 -Compress)
 
 function Invoke-Shadow { param($tp, $name)
-    $sid = "test_$name"
+    $sid = "test_${runTag}_$name"
     $dir = Join-Path $env:TEMP "shadowguard\$sid"
-    Remove-Item -LiteralPath $dir -Recurse -Force -ErrorAction SilentlyContinue
     $mk = { param($t) @{ transcript_path = $t; stop_hook_active = $false; session_id = $sid
                          cwd = $PSScriptRoot } | ConvertTo-Json -Compress }
     (& $mk $tp) | & powershell -NoProfile -ExecutionPolicy Bypass -File $hook | Out-Null
@@ -188,3 +206,5 @@ foreach ($c in $cases) {
 }
 ""
 if ($fail -eq 0) { "all $($cases.Count) cases passed" } else { "$fail of $($cases.Count) FAILED" }
+"artifacts: $tmp"
+exit [int]($fail -ne 0)

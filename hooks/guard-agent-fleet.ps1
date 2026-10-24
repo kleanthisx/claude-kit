@@ -58,7 +58,7 @@ if ($n -le $THRESHOLD) { exit 0 }
 # Blast-radius estimate read from the agent's own prompt, not from the model's description.
 $p = [string]$in.tool_input.prompt
 $perAgent = 0
-if ($p -match '(?i)(\d+)\s*(?:-|to|–)\s*(\d+)\s*sources') { $perAgent = [int]$Matches[2] }
+if ($p -match '(?i)(\d+)\s*(?:-|to|\u2013)\s*(\d+)\s*sources') { $perAgent = [int]$Matches[2] }
 elseif ($p -match '(?i)(?:at most|up to|read)\s*(\d+)\s*sources') { $perAgent = [int]$Matches[1] }
 elseif ($p -match '(?i)websearch|webfetch|search the web|\bsources\b|\bfetch\b') { $perAgent = 10 }
 

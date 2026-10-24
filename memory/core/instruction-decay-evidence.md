@@ -4,7 +4,6 @@ description: "Sourced findings on why standing directives decay in long sessions
 metadata: 
   node_type: memory
   type: reference
-  originSessionId: cd191791-1c12-4340-a661-8cbdfbe32781
   modified: 2026-08-11T15:27:18.710Z
 ---
 

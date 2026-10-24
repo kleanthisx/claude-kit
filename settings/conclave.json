@@ -1,0 +1,37 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -I {{CLAUDE_HOME}}/conclave/claude_hook.py --council {{COUNCIL}} --mode observe{{PROJECT_ROOTS}}",
+            "timeout": 10,
+            "statusMessage": "Recording intent in Conclave"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Agent|Task|Workflow|Edit|Write|NotebookEdit|Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -I {{CLAUDE_HOME}}/conclave/claude_hook.py --council {{COUNCIL}} --mode observe{{PROJECT_ROOTS}}",
+            "timeout": 10,
+            "statusMessage": "Conclave gate"
+          }
+        ]
+      }
+    ]
+  },
+  "mcpServers": {
+    "conclave": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["-I", "{{CLAUDE_HOME}}/conclave/mcp_server.py", "--actor", "claude", "--council", "{{COUNCIL}}"],
+      "env": {}
+    }
+  }
+}

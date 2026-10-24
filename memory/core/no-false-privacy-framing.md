@@ -4,7 +4,6 @@ description: "never label reasoning, notes or planning as \"private\" — the us
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: e13cd0c7-a27e-454e-a43f-39d75c4e7936
   modified: 2026-09-13T11:20:40.671Z
 ---
 

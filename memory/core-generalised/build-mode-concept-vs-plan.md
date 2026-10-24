@@ -4,7 +4,6 @@ description: "There is ALWAYS a plan — fuzzy at the start, held and steered by
 metadata:
   node_type: memory
   type: feedback
-  originSessionId: 649df042-b2c0-49fe-8801-3d981f00dc59
   modified: 2026-08-11T15:37:11.700Z
 ---
 

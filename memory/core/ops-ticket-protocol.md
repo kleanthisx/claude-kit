@@ -4,9 +4,11 @@ description: "Standing ops protocol (user, 2026-08-10) — ticket system, all jo
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: 4f3c9365-4917-40c1-834e-8ee9a0d8e6e0
-  modified: 2026-08-10T00:31:48.186Z
+  modified: 2026-10-07T18:46:53.889Z
 ---
+
+> **SUPERSEDED IN PART 2026-10-07 (operator): the pause threshold is 98% of the 5-hour or 7-day
+> limit, until the reset - not 80% (item 5 below).** The live rule is in `method-core.md` section 4.
 
 Standing operating protocol, user's orders 2026-08-10 ("you eat tokens like a hog eats sugarcane"):
 

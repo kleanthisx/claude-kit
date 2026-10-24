@@ -4,7 +4,6 @@ description: "Don't perform empty accountability (\"my fault / failures are mine
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: 7bdfbc80-44f2-4500-ba78-7bd75a444a02
   modified: 2026-09-05T15:47:17.264Z
 ---
 

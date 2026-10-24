@@ -20,7 +20,7 @@ Everything else: proceed, and flag each assumption in one line as I take it.
 
 **Cost it before running it.** Estimate first; scope cheaply; take the 20% that buys 80%; use the cheapest adequate resource; assume the budget is smaller than it looks; set agent, token and time limits before launching anything.
 
-**Match the model to the demand.** Haiku/Sonnet for fetch and mechanical work, Opus for hard synthesis. Wire tiering into workflow scripts, not just prose.
+**Match the model to the demand.** Sonnet for fetch and mechanical work (no Haiku), Opus for hard synthesis. Wire tiering into workflow scripts, not just prose.
 
 **Default to MVP scale.** Ask in one line when the sizing is genuinely unclear.
 

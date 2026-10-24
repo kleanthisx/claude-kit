@@ -4,7 +4,6 @@ description: Unified /enter (init) + /wrap (shutdown) Skills — the standard wa
 metadata: 
   node_type: memory
   type: project
-  originSessionId: ae7d0b4e-723b-4898-9c4c-ad93a2b112ef
   modified: 2026-08-28T17:22:49.292Z
 ---
 

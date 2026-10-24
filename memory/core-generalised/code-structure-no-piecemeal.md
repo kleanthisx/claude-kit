@@ -4,7 +4,6 @@ description: "Break engines into modules/objects with clear ownership (no single
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: 9f2df323-62f1-4091-b1db-6fba74ee35df
   modified: 2026-07-24T16:12:05.977Z
 ---
 

@@ -4,7 +4,6 @@ description: "When the user is away, never seize on an approval gate — restruc
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: 4f3c9365-4917-40c1-834e-8ee9a0d8e6e0
   modified: 2026-08-10T07:34:21.538Z
 ---
 

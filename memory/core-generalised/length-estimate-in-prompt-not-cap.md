@@ -4,7 +4,6 @@ description: "Control reply length with an estimate IN THE PROMPT (\"aim for ~15
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: c70b1007-9573-41fe-8972-5240b6dc2ff7
   modified: 2026-09-11T21:04:37.669Z
 ---
 

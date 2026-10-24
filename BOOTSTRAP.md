@@ -16,8 +16,8 @@ installed files. Each component addresses a measured failure listed in section b
 | problem | measured evidence | component |
 |---|---|---|
 | Prohibitions ("never do X") decay over a session | omission-type constraints fell from 73% compliance at turn 5 to 33% by turn 16; commission-type ("always do X") held at 100% ([arXiv 2604.20911](https://arxiv.org/html/2604.20911v1); `memory/core/instruction-decay-evidence.md`) | `doctrine/RULES.md` rewrites every rule as an action to perform |
-| Compliance drops the deeper into a session you go | each additional step carries ~5.6% lower odds of compliance (OR = 0.944) in the same 1,650-session study (`memory/core/instruction-decay-evidence.md`) | re-injection on `PostCompact` |
-| Compaction silently deletes standing constraints | violations rose from 0% (policy in full context) to 30%, and 59% on some models, after compaction, with the agent unaware the rule was dropped ([arXiv 2606.22528](https://arxiv.org/abs/2606.22528); `memory/core/instruction-decay-evidence.md`) | `hooks/session-rules.ps1` + `hooks/load-wiki.ps1`, both wired on `SessionStart` **and** `PostCompact` |
+| Compliance drops the deeper into a session you go | each additional step carries ~5.6% lower odds of compliance (OR = 0.944) in the same 1,650-session study (`memory/core/instruction-decay-evidence.md`) | re-injection on `SessionStart` with `source=compact` |
+| Compaction silently deletes standing constraints | violations rose from 0% (policy in full context) to 30%, and 59% on some models, after compaction, with the agent unaware the rule was dropped ([arXiv 2606.22528](https://arxiv.org/abs/2606.22528); `memory/core/instruction-decay-evidence.md`) | `hooks/session-rules.ps1` + `hooks/load-wiki.ps1`, both wired on `SessionStart`, including after compaction |
 | A governing document one grep away still doesn't get opened | governing document never opened in ~96-97% of violations, even when a grep would have found it (`wiki-v2/SYNTHESIS.md` line 49) | `hooks/guard-entity-read.ps1` denies an edit until every page that owns the file, and the pages on their `depends:`/`dependents:` lines, have been read; `hooks/load-wiki.ps1` puts the index in context |
 | Prose rules get ignored under load | deterministic pre-execution gates blocked >90% of unsafe executions across 750 scenarios and eliminated all hazardous actions on a 250-scenario benchmark, at 1.4-2.8ms overhead ([AgentSpec](https://arxiv.org/html/2503.18666v1); `memory/core/enforcement-approaches-evidence.md`) | the `guard-*.ps1` hook layer |
 | Read-only pre-checks measurably help, not just block | task success rose 29.6%→42.0% (GPT-4o-mini) and 61.2%→71.6% (GPT-5.2) with a read-only pre-execution gate ([Reason Less, Verify More](https://arxiv.org/abs/2607.07405); `memory/core/enforcement-approaches-evidence.md`) | the `guard-*.ps1` hook layer; Judge Dread on `Stop` |
@@ -35,7 +35,7 @@ flowchart TD
     W --> G1["PreToolUse guards\nguard-destructive / guard-plan-gate\nguard-entity-read / guard-launch-gate / guard-agent-fleet"]
     G1 --> W
     W --> STOP["Stop\njudge-dread.ps1"]
-    W -->|context compacted| PC["PostCompact\nsession-rules.ps1 + load-wiki.ps1 re-inject"]
+    W -->|context compacted| PC["SessionStart source=compact\nnumbered context parts re-inject"]
     PC --> W
     STOP --> WRAP["/wrap (checkpoint, ledger, propose commit)"]
 ```
@@ -43,53 +43,74 @@ flowchart TD
 | component | where it lives | when it acts | what it enforces / carries |
 |---|---|---|---|
 | `install.ps1` | repo root | run once per machine, re-run to update | copies hooks/skills/agents/tools, merges `settings.json`, installs a memory tier |
-| `session-rules.ps1` | `hooks/` | `SessionStart`, `PostCompact` | injects `doctrine/RULES.md` plus the full installed memory tier into context, in full, not summarised |
-| `load-wiki.ps1` | `hooks/` | `SessionStart`, `PostCompact` (after `session-rules.ps1`) | injects a v2 project's generated wiki surfaces (`OVERVIEW.md`, `DISCARDED.md`, `NAMES.md`, `DECISIONS.md`, `doctrine/`); no-ops outside a v2 project |
+| `session-rules.ps1` | `hooks/` | `SessionStart` (32 parallel parts, also on compaction) | injects `doctrine/RULES.md` plus the full selected memory tier, not summarised; every part is below 10,000 characters |
+| `load-wiki.ps1` | `hooks/` | `SessionStart` (40 parallel parts, also on compaction) | injects a v2 project's always-loaded wiki surfaces (`SYSTEM.md` or, without one, `OVERVIEW.md` + `NAMES.md`; `DISCARDED.md`; `doctrine/`; `DECISIONS.md` stays on demand); warns when started above a v2 project |
 | `guard-destructive.ps1` | `hooks/` | `PreToolUse` on `Bash\|PowerShell` | interactive ask-prompt on destructive shell patterns (recursive delete, force-push, hard reset, bare stash, format/clear-disk) |
 | `guard-plan-gate.ps1` | `hooks/` | `PreToolUse` on `Edit\|Write\|NotebookEdit` | denies edits while an armed `PLAN.md` lacks `APPROVED: GO` |
-| `guard-entity-read.ps1` | `hooks/` | `PreToolUse` on `Edit\|Write\|NotebookEdit`, alongside plan-gate | denies an edit until every page that `owns:` the file, and the pages on their `depends:` and `dependents:` lines, have been read this session |
+| `guard-entity-read.ps1` | `hooks/` | `PreToolUse` on `Edit\|Write\|NotebookEdit`, alongside plan-gate | requires a complete successful Read of the current version of every page that `owns:` the file and of the pages on their `depends:` and `dependents:` lines; also denies new unowned scripts written through `Write` |
 | `guard-launch-gate.ps1` | `hooks/` | `PreToolUse` on `Workflow` | denies multi-agent fleet launches unless a machine-computed audit is pre-approved in `LAUNCH.md`, pinned to a SHA256 of the exact script |
 | `guard-agent-fleet.ps1` | `hooks/` | `PreToolUse` on `Agent` | asks once accumulated agent spawns exceed 3 in a rolling 15-minute window, bounding user-facing prompts, not individual spawns |
+| `usage-gate.ps1` | `hooks/` | `PreToolUse` on every state-changing or paid tool (`Agent\|Bash\|PowerShell\|Edit\|Write\|NotebookEdit\|WebFetch\|WebSearch\|Workflow\|Skill`) | sleeps the tool call while the 5-hour or 7-day usage meter is at or above `CLAUDE_USAGE_PAUSE_PCT` (default 98), until the reset plus 60 s; reads `~/.claude/usage-state.json`, which `tools/statusline-usage.ps1` writes from the server's own rate-limit headers |
+| `keep-going.ps1` | `hooks/` | `Stop`, every turn end | armed by `/unattended on` (flag file `~/.claude/unattended.json`): blocks a turn from ending until the final message carries a `STOP-CASE: <reason>` line; cap 40 blocks per arming; silent when not armed |
+| `commissar-gate.py` (optional, `-WithCommissar`) | `hooks/` | `PreToolUse` on `Edit\|Write\|NotebookEdit\|Bash\|PowerShell\|mcp__commissar__.*` | lets a state-changing call through only if a plan approved by THE COMMISSAR (a reviewer on a second model, OpenAI through the Codex CLI) covers it; code only, ~10 ms; `log` mode records, `enforce` mode blocks and fails closed when she is down. `commissar/README.md` |
+| `conclave/claude_hook.py` (optional, `-WithConclave`) | `conclave/` | `UserPromptSubmit` and `PreToolUse` on `Agent\|Task\|Workflow\|Edit\|Write\|NotebookEdit\|Bash\|PowerShell` | records each operator prompt verbatim and, in `enforce` mode, lets a state-changing call through only while a plan both models approved is executing, with no open Codex veto, edits inside its `allowed_paths` and commands under its `allowed_commands`; installed in `observe` mode. The council itself is `conclave/mcp_server.py`, registered for Claude Code as `mcpServers.conclave`; the Codex side is registered by hand. `conclave/README.md` |
 | `judge-dread.ps1` (+ `judge-dread-*.ps1`) | `hooks/` | `Stop`, every turn end | adversarial audit of the turn's completion claim; one `claude -p` call per claim-bearing turn; fails open if the CLI errors or the verdict is malformed |
 | `/enter` | `skills/enter/SKILL.md` | start of session, before any building | read-only orientation: root, ledger, NAMES.md resolution, git status, then stops and reports |
 | `/wrap` | `skills/wrap/SKILL.md` | end of session | writes ledger/entity updates, a next-session pointer, and proposes (never runs) a commit |
+| `/unattended` | `skills/unattended/SKILL.md` | operator only, before leaving the machine | `on` writes the flag file that arms `keep-going.ps1`; `off` removes it |
+| `/fleet` | `skills/fleet/SKILL.md` | operator only, for a long unattended batch | central session + up to 5 background workers on file-disjoint lanes, each with one cheaper helper; pre-approves the batch in `FLEET.md`, arms `/unattended`, workers report in `fleet/lane-N.md` |
+| `/commissar` (optional, `-WithCommissar`) | `skills/commissar/SKILL.md` | operator only | the operator's direct line to the reviewer: `<message>`, `state`, `on`, `off`, `help`, `repair`; her answer is printed verbatim; the words are read from the transcript, so the agent cannot speak in the operator's name |
 
 ## d. The rules
 
 **Doctrine** (`doctrine/`)
 - `CLAUDE.md` — the working agreement: act by default; five stop-and-wait cases (irreversible, outward-facing, a question aimed at the operator, a `Q:` message, spend past a stated bound); follow the stated method; cost it before running it; there is always a plan; report as evidence; track multi-step work as a checklist.
-- `RULES.md` (3.9 KB) — the same agreement, compacted for injection at `SessionStart` and `PostCompact`.
+- `RULES.md` (3.9 KB) — the same agreement, compacted for injection at `SessionStart`.
 - `RATIONALE.md` — why the rules are shaped this way and their edit history; not itself an instruction.
 
 **Memory tiers** (`memory/`, counts as currently on disk — recompute, do not reuse these numbers after the next edit)
-- `core/` — 17 files. Method with no project in the evidence. Ships everywhere.
-- `core-generalised/` — 43 files. The rules whose evidence named a project, rewritten so the
+- `core/` — 19 files. Method with no project in the evidence. Ships everywhere.
+- `core-generalised/` — 64 files. The rules whose evidence named a project, rewritten so the
   project is described rather than named, plus the `gem-*.md` generic lessons that never had a
   project-named counterpart to begin with. Ships everywhere.
 - `core-sensitive/` — 30 files. The named originals of the generalised rules. Git-ignored: present
   only on the machine they were written on.
-- `personal/` — 21 files. Project state and machine specifics, plus `inject-exclude.home.txt`. Git-ignored.
+- `personal/` — 20 content files plus `MEMORY.personal.md`, which is used to build the home index
+  but is not installed. Project state and machine specifics, plus `inject-exclude.home.txt`. Git-ignored.
 - `-Profile work` installs `core + core-generalised` = 60 files (~141 KB, ~35k tokens).
-- `-Profile home` installs `core + core-sensitive + personal` = 68 files (~193 KB, ~48k tokens).
+- `-Profile home` installs `core + core-sensitive + personal` = 67 content files plus one
+  `MEMORY.md` index (generated if absent, preserved if present; ~190 KB of content on disk, ~48k tokens).
 
 **Hooks** (`hooks/`, wired via `settings/hooks.json`)
 - `guard-destructive.ps1`, `guard-plan-gate.ps1`, `guard-entity-read.ps1`, `guard-launch-gate.ps1`,
-  `guard-agent-fleet.ps1` — the `PreToolUse` gates listed in the table above.
+  `guard-agent-fleet.ps1`, `usage-gate.ps1` — the `PreToolUse` gates listed in the table above.
+- `keep-going.ps1` — the `Stop`-hook unattended gate (armed by `/unattended on`).
+- `commissar-gate.py` — the `PreToolUse` plan gate of the optional commissar layer (`commissar/`,
+  installed with `-WithCommissar`; needs Python, Node and a logged-in Codex CLI; her calls bill the
+  Codex account). Not installed by default.
+- `conclave/claude_hook.py` — the intent recorder and execution gate of the optional conclave layer
+  (`conclave/`, installed with `-WithConclave -Council <name>`): a two-model council over one SQLite
+  database in which Claude leads execution and Codex reviews architecture and may veto. Python 3.11+
+  only; the Codex MCP registration is done by hand. Not installed by default.
 - `judge-dread.ps1` — the `Stop`-hook adversarial completion audit (`judge-dread-ask.ps1`,
   `-ctl.ps1`, `-deliver.ps1`, `-worker.ps1` are its supporting pieces).
-- `session-rules.ps1`, `load-wiki.ps1` — the `SessionStart`/`PostCompact` injectors.
+- `session-rules.ps1`, `load-wiki.ps1`, `context-part.ps1` — the numbered `SessionStart` injectors.
 - `run-posttest.ps1` — `PostToolUse` on `Edit|Write`; opt-in per project via `.claude/posttest.ps1`.
 - `verify-done.ps1` — superseded by `judge-dread.ps1`; kept as a record, not wired.
 
 ## e. Costs and limits
 
-- **Injection tokens.** `session-rules.ps1` injects the full installed memory tier plus `RULES.md`
-  (3.9 KB) at every `SessionStart` and `PostCompact`: ~35k tokens for the work profile (60 files,
-  ~141 KB), ~48k tokens for the home profile (68 files, ~193 KB). Tune with `memory/inject-exclude.txt`
+- **Injection tokens.** `session-rules.ps1` injects the selected memory files plus `RULES.md`
+  (3.9 KB) at every `SessionStart` (including after compaction). The work tier has 83 files (~227 KB on disk), the home tier 67 installed content files (~190 KB on disk), but the selected injection is smaller when
+  `inject-exclude.txt` excludes inventory; one pre-fix home snapshot measured ~131,000 characters.
+  Tune with `memory/inject-exclude.txt`
   (or `memory/personal/inject-exclude.home.txt` on the home profile) — do not tune it by going back
   to a summary; that was the exact bug this design replaced (`README.md`, `hooks/session-rules.ps1` header).
-- **`load-wiki.ps1`** costs roughly 74 KB / ~19k tokens per injection on one measured v2 project
-  (`hooks/README.md`); this is per-project and will differ on a new site's actual wiki.
+- **`load-wiki.ps1`** currently costs roughly 112 KB / ~28k tokens per injection on one v2 project
+  (`hooks/README.md`); this is per-project and will differ elsewhere. All matching hooks run in
+  parallel, so part numbers and a shared SHA256 label identify one complete snapshot. If the
+  configured capacity is exceeded, part 1 emits a delivery-failed notice instead of claiming
+  a truncated injection succeeded.
 - **Judge Dread is one model call (`claude -p`) per claim-bearing turn.** `/judge quiet` or
   `/judge off` if that trade is not wanted on a given machine.
 - **`guard-destructive.ps1` script scanning — limits** (`hooks/guard-destructive.ps1` lines 83-154):
@@ -114,7 +135,7 @@ flowchart TD
 
 ## f. Adapting at a new site
 
-**Installs as-is, no adaptation needed:** `hooks/`, `skills/*/SKILL.md` (`enter`, `judge`, `wrap`),
+**Installs as-is, no adaptation needed:** `hooks/`, `skills/*/SKILL.md` (`enter`, `judge`, `wrap`, `unattended`, `fleet`; `commissar` only with `-WithCommissar`),
 `tools/`, `agents/scribe.md`, `doctrine/CLAUDE.md` + `RULES.md` (only if the target has no
 `~/CLAUDE.md` already — an existing one is left alone), the `settings.json` hook/permission/statusLine
 merge.
@@ -153,8 +174,9 @@ these there; this document does not decide them:**
 **Start order:**
 1. `powershell -File install.ps1 -WhatIf` — read every line before running anything for real.
 2. `powershell -File install.ps1 -Profile work -MemoryDir <path>` — real install.
-3. Run the test suites: `tests\test-hooks.ps1`, `tests\test-entity-read.ps1`,
-   `python tests\test-delete-coverage.py` (skip `test-judge-dread.ps1` until `claude` on `PATH` is confirmed).
+3. Run the non-model suites: `tests\test-install-profile.ps1`, `tests\test-context-delivery.ps1`,
+   `tests\test-hooks.ps1`, `tests\test-entity-read.ps1`, and `python tests\test-delete-coverage.py`.
+   `test-judge-dread.ps1` makes 14 paid model calls; run it only when that cost is intended.
 4. Write the site's own `CLAUDE.md` from `templates/doctrine/CLAUDE.workspace.template.md`, if this
    is a multi-project workspace.
 5. Pick a wiki version (v1 or v2) per `wiki-v1/README.md`.

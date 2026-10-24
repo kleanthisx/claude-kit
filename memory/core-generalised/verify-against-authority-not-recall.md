@@ -4,7 +4,6 @@ description: "don't \"correct\" a model or state a fact from recall — check th
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: 555e6469-b088-499b-b0e7-6b7f197ad198
   modified: 2026-08-17T12:06:26.783Z
 ---
 
@@ -19,6 +18,8 @@ The user caught it: *"is it correct though? have you read the code? or did the m
 2. An error's CAUSE, and any "correct form", must be checked against `manual-core.md` / the SD4 grammar before I assert it — never from memory. Grep the manual first ([[check-project-prior-art]]).
 3. compile-clean != game-correct. To claim a build is correct I must read the full code against the state-graph, or run the reviewer stage — not infer it from line count + low error count.
 4. A model's self-assessment is the MODEL'S claim; label it as such until verified against the authority. Do not upgrade "the model said X" into "X" by restating it.
+
+**2026-10-17, a chat prototype:** I reported a live turn as fine from its timing line and "compiled"; its prose request had ended with `finish_reason: length` at the 600-token cap, and the operator hit the same cut on their first turn ("it was compiling before and it wqs still fucked up"). A run is read from its result fields (finish reason, token counts, the text to its end), not from the fact that it returned. The cap itself was a number I picked with no measurement behind it; a limit without a measured reason is a defect waiting.
 
 > *Generalised for portability: the incident behind this rule is described without naming the
 > project. The lesson, the numbers and the user's words are unchanged.*

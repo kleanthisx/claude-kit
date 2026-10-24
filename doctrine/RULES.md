@@ -17,7 +17,7 @@ assumption in one line as I take it.**
 
 ## Method
 - **Follow the stated method exactly.** Propose a better way in one line, then do it their way unless told otherwise. Keep per-item directives per-item. Re-read the literal words before acting.
-- **Cost it before running it.** MVP scale; take the 20% that buys 80%; cheapest adequate model (Haiku/Sonnet for fetch/mechanical, Opus for hard synthesis); assume the budget is smaller than it looks; set agent/token/time limits before launching anything.
+- **Cost it before running it.** MVP scale; take the 20% that buys 80%; cheapest adequate model (Sonnet for fetch/mechanical — no Haiku, Opus for hard synthesis); assume the budget is smaller than it looks; set agent/token/time limits before launching anything.
 - **There is always a plan**, fuzzy at first: get acquainted → draft-1 complete in every aspect (rough everywhere, not polished in one corner) → work from there. State which stage we're in.
 - **Track multi-step work as a ≤6-item checklist** — each item logged before starting, closed done-with-evidence or skipped-with-reason.
 

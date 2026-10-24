@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "properties": {
+    "decision": {"type": "string", "enum": ["approve", "object", "escalate"]},
+    "message": {"type": "string", "description": "to the agent: on object, exactly which step and why; on approve, one line"},
+    "rules_checked": {"type": "array", "items": {"type": "string"}, "description": "every rule of the method you checked, quoted briefly"},
+    "question_for_operator": {"type": "string", "description": "on escalate: the question only the operator can settle; else empty"},
+    "doctrine_update": {
+      "type": "object",
+      "properties": {
+        "action": {"type": "string", "enum": ["none", "append", "replace"]},
+        "text": {"type": "string", "description": "append: the rule or note to add; replace: your whole new copy; none: empty"},
+        "reason": {"type": "string", "description": "why, in one line; empty for none"}
+      },
+      "required": ["action", "text", "reason"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["decision", "message", "rules_checked", "question_for_operator", "doctrine_update"],
+  "additionalProperties": false
+}

@@ -5,7 +5,6 @@ metadata:
   node_type: memory
   type: feedback
   modified: 2026-09-16T16:08:17.614Z
-  originSessionId: 407ae3d3-d641-4c27-a82c-82fe6faaf105
 ---
 
 **RETIRED 2026-09-16. Do not spawn a scribe subagent. The previous content of this file — "keep a

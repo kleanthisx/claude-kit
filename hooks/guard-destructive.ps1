@@ -69,11 +69,19 @@ $patterns = @(
     '\.unlink\s*\(',
     '\.rmdir\s*\(',
     # --- git / disk (unchanged) ---
-    'git\s+push\s+[^;|&]*--force(?!-with-lease)',
-    'git\s+push\s+[^;|&]*\s-f\b',
-    'git\s+reset\s+--hard',
-    'git\s+clean\s+-[a-zA-Z]*f',
-    'git\s+stash\b(?!\s+(pop|apply|list|show|branch))',
+    'git(?:\s+-[Cc]\s+\S+|\s+--(?:git-dir|work-tree)=\S+)*\s+push\s+[^;|&]*--force(?!-with-lease)',
+    'git(?:\s+-[Cc]\s+\S+|\s+--(?:git-dir|work-tree)=\S+)*\s+push\s+[^;|&]*\s-f\b',
+    'git(?:\s+-[Cc]\s+\S+|\s+--(?:git-dir|work-tree)=\S+)*\s+reset\s+--hard',
+    'git(?:\s+-[Cc]\s+\S+|\s+--(?:git-dir|work-tree)=\S+)*\s+clean\s+-[a-zA-Z]*f',
+    'git(?:\s+-[Cc]\s+\S+|\s+--(?:git-dir|work-tree)=\S+)*\s+stash\b(?!\s+(pop|apply|list|show|branch))',
+    # discard uncommitted working-tree changes (added 2026-10-05: `git checkout -- .gitignore` wiped
+    # other sessions' uncommitted lines, incl. the ignore rules for the webapp signing key and user db)
+    'git(?:\s+-[Cc]\s+\S+|\s+--(?:git-dir|work-tree)=\S+)*\s+checkout\b[^;|&\n]*\s--(\s|$)',
+    'git(?:\s+-[Cc]\s+\S+|\s+--(?:git-dir|work-tree)=\S+)*\s+checkout\b[^;|&\n]*\s(-f|--force)\b',
+    'git(?:\s+-[Cc]\s+\S+|\s+--(?:git-dir|work-tree)=\S+)*\s+checkout\b[^;|&\n]*\s\.(\s|$|[;|&])',
+    'git(?:\s+-[Cc]\s+\S+|\s+--(?:git-dir|work-tree)=\S+)*\s+restore\b(?![^;|&\n]*\s--staged)',
+    'git(?:\s+-[Cc]\s+\S+|\s+--(?:git-dir|work-tree)=\S+)*\s+restore\b[^;|&\n]*\s(--worktree|-W)\b',
+    'git(?:\s+-[Cc]\s+\S+|\s+--(?:git-dir|work-tree)=\S+)*\s+switch\b[^;|&\n]*\s(-f\b|--force\b|--discard-changes\b)',
     '\bmkfs\b',
     '\bFormat-Volume\b',
     '\bClear-Disk\b'

@@ -4,7 +4,6 @@ description: "A research pass must RETAIN the full fetched source text (a corpus
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: 3a873254-63ff-47c5-95ec-1222a141cd15
   modified: 2026-08-15T10:10:21.612Z
 ---
 

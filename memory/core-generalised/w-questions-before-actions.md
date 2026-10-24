@@ -4,7 +4,6 @@ description: "Before ANY action, plan with the W questions (goal, why, best-valu
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: 964ab6eb-a7dc-47bc-b48d-fd20ad0c6c3a
   modified: 2026-08-09T22:39:10.574Z
 ---
 
@@ -38,7 +37,17 @@ These questions MUST have coherent answers before moving to act — no exception
 2. UNKNOWN → descend a layer and search: memory index → memory files → project docs/prior art → the manual/script/config that will execute → web. Terminal state for a stubborn unknown is a REFERENCE to where the answer lives, flagged as such — never a silent guess.
 3. **The unit of recursion is the ANSWER, not the node** (user, taught live in a thought-graph editor tool, 2026-08-10): "every question left unanswered or needs clarification spawns another set of questions that needs answering." An unanswered/fuzzy/mechanism-naming answer becomes the WHAT of a new node linked out of that specific question, and gets its own full W set ("Who: cheap agents" is unresolved until "how does THIS script assign models?" is resolved by reading it).
 4. Recurse until every thread terminates in a clear answer. Not infinite: "it's all about criticality of task and value" (user, 2026-08-10) — pull threads deep where failure is expensive (spend/destructive/architectural), terminate fast where it's cheap (MVP/routine).
-5. "Every node in this tree of thought has all the W questions answered. Then it all COMPILES into a plan" (user) — and the compile direction (2026-08-10): "then every answer has a place in the plan." Nothing floats, nothing is orphaned; the graph IS the plan before formatting. An unresolved W at any node is a compile error: no plan exists yet, only the illusion of one. A top level that "sounds coherent" with unresolved branches is a plan-shaped guess — the exact shape of the 2026-08-09 failure, which dies at depth one of this tree. Working tool: a small local thought-graph app (an editor page + a local server on its own port, a live state file, a live chat log).
+5. "Every node in this tree of thought has all the W questions answered. Then it all COMPILES into a plan" (user) — and the compile direction (2026-08-10): "then every answer has a place in the plan." Nothing floats, nothing is orphaned; the graph IS the plan before formatting. An unresolved W at any node is a compile error: no plan exists yet, only the illusion of one. A top level that "sounds coherent" with unresolved branches is a plan-shaped guess — the exact shape of the 2026-08-09 failure, which dies at depth one of this tree. Working tool: a thought-graph editor (editor.html + server.py on :8776, state.json is the live graph, chat.jsonl the live channel).
+
+**2026-10-16, an inference engine on the node: the gate was not checked before the spend.** The thread had one gate: does the engine
+load our RVN IQ3_XS GGUF. The README fetch already listed the supported quants without IQ3_XS; I marked it "open" and
+went on to build a full reinstall package, let the operator delete four models to make room, and started an 86 GB
+push, and only then grepped `setup.py`, which refuses IQ3_XS by name in one function. Operator: *"do you ever check
+to proceed to the next level?"* **Why:** each next step was taken because it was available, not because the previous
+level had passed; the check cost one grep, the steps cost an hour and four deletions. **How to apply:** before any step
+that spends (download, delete, rental, build), name the single question that decides whether the step is needed, and
+answer it from the cheapest source first (the code, the manual, a one-line test). An "open" item that gates the next
+step is not open; it is the next step.
 
 > *Generalised for portability: the incident behind this rule is described without naming the
 > project. The lesson, the numbers and the user's words are unchanged.*

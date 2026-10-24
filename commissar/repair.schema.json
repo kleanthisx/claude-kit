@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "changed_files": {"type": "array", "items": {"type": "string"}, "description": "files you changed, relative to your folder"},
+    "tests": {"type": "string", "enum": ["pass", "fail", "not run"], "description": "result of python -I test_classify.py after your change"},
+    "summary": {"type": "string", "description": "for the operator: what failed, what you changed, what the tests showed"}
+  },
+  "required": ["changed_files", "tests", "summary"],
+  "additionalProperties": false
+}

@@ -4,7 +4,6 @@ description: "User (computer engineer) wants terse, literal, technical replies â
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: f022b610-5f6e-4faf-856f-cce87b8d616c
   modified: 2026-09-04T20:14:32.315Z
 ---
 

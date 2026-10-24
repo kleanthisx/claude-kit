@@ -4,7 +4,6 @@ description: "At EVERY session start, recite the three operational directive set
 metadata: 
   node_type: memory
   type: feedback
-  originSessionId: 4f3c9365-4917-40c1-834e-8ee9a0d8e6e0
   modified: 2026-08-09T10:42:07.204Z
 ---
 
